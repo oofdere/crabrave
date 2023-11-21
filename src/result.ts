@@ -1,48 +1,48 @@
 type Ok<T> = {
-  status: "ok";
-  data: T;
+	status: "ok";
+	data: T;
 };
 
 type Err<E> = {
-  status: "err";
-  data: E;
+	status: "err";
+	data: E;
 };
 
 type _Result<T, E> = Ok<T> | Err<E>;
 
 export class Result<T, E> {
-  private result: _Result<T, E>;
+	private result: _Result<T, E>;
 
-  constructor(result: _Result<T, E>) {
-    this.result = result;
-  }
+	constructor(result: _Result<T, E>) {
+		this.result = result;
+	}
 
-  public get value(): Ok<T> | Err<E> {
-    return this.result;
-  }
+	public get value(): Ok<T> | Err<E> {
+		return this.result;
+	}
 
-  static ok<T, E>(data: T): Result<T, E> {
-    return new Result<T, E>({ status: "ok", data });
-  }
+	static ok<T, E>(data: T): Result<T, E> {
+		return new Result<T, E>({ status: "ok", data });
+	}
 
-  static err<T, E>(data: E): Result<T, E> {
-    return new Result<T, E>({ status: "err", data });
-  }
+	static err<T, E>(data: E): Result<T, E> {
+		return new Result<T, E>({ status: "err", data });
+	}
 
-  unwrap(): T {
-    if (this.result.status === "err") {
-      throw this.result.data;
-    }
-    return this.result.data;
-  }
+	unwrap(): T {
+		if (this.result.status === "err") {
+			throw this.result.data;
+		}
+		return this.result.data;
+	}
 
-  match<U, V>(ok: (data: T) => U, err: (data: E) => V): U | V {
-    if (this.result.status === "err") {
-      return err(this.result.data);
-    } else {
-      return ok(this.result.data);
-    }
-  }
+	match<U, V>(ok: (data: T) => U, err: (data: E) => V): U | V {
+		if (this.result.status === "err") {
+			return err(this.result.data);
+		} else {
+			return ok(this.result.data);
+		}
+	}
 }
 
 export const Ok = Result.ok;
