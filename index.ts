@@ -1,2 +1,2 @@
-export { Result } from "./result";
-export { Option } from "./option";
+export { Result, Ok, Err } from "./result";
+export { Option, Some, None } from "./option";

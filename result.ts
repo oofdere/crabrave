@@ -35,4 +35,15 @@ export class Result<T, E> {
     }
     return this.result.data;
   }
+
+  match<U, V>(ok: (data: T) => U, err: (data: E) => V): U | V {
+    if (this.result.status === "err") {
+      return err(this.result.data);
+    } else {
+      return ok(this.result.data);
+    }
+  }
 }
+
+export const Ok = Result.ok;
+export const Err = Result.err;

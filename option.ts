@@ -23,11 +23,21 @@ export class Option<T> {
     return new Option<T>(null);
   }
 
-  match<U, V>(some: (data: T) => U, none: () => V): void {
+  unwrap(): T {
     if (this.option === null) {
-      none();
+      throw new Error("Failed to unwrap!");
+    }
+    return this.option;
+  }
+
+  match<U, V>(some: (data: T) => U, none: () => V): U | V {
+    if (this.option === null) {
+      return none();
     } else {
-      some(this.option);
+      return some(this.option);
     }
   }
 }
+
+export const Some = Option.some;
+export const None = Option.none;
