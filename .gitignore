@@ -1,3 +1,7 @@
+# lock file is over 100kb for some reason
+# also no deps when not developing, so just removed it entirely
+bun.lockb
+
 # Based on https://raw.githubusercontent.com/github/gitignore/main/Node.gitignore
 
 # Logs
