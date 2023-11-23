@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { Enum, match, pack } from "..";
 
-interface Tests extends Enum {
+type Tests = {
 	Null: null;
 	Undefined: undefined;
 	Boolean: true;
@@ -14,7 +14,7 @@ interface Tests extends Enum {
 	Object: Object;
 	FixedArray: [1, 2, 3];
 	Array: Array<number>;
-}
+};
 
 const tests = {
 	Null: null,
@@ -43,27 +43,25 @@ describe("packing", () => {
 
 // matching
 describe("matching", () => {
-	let packs: ReturnType<typeof pack<Tests>>[] = [];
+	const packs: Enum<Tests>[] = [];
 	for (const k in tests) {
-		test(k, () => {
-			packs.push(pack<Tests>(k, tests[k]));
-		});
+		test(k, () => packs.push(pack<Tests>(k, tests[k])));
 	}
 
 	for (const p of packs) {
 		test(p.k, () => {
-			match<Tests>(p, {
-				Null: (e) => expect(e).toBeNull(),
-				Undefined: (e) => expect(e).toBeUndefined(),
-				Boolean: (e) => expect(e).toBeTrue(),
-				Number: (e) => expect(e).toBe(0),
-				Bigint: (e) => expect(e).toBeTypeOf("bigint"),
-				String: (e) => expect(e).toBe("string"),
-				Symbol: (e) => expect(e).toBe(tests["Symbol"]),
-				FixedObject: (e) => expect(e).toBe({ key: "value" }),
-				Object: (e) => expect(e).toMatchObject({ key: "value" }),
-				FixedArray: (e) => expect(e).toBeArrayOfSize(3),
-				Array: (e) => expect(e).toBeArray(),
+			match(p, {
+				Null: (e) => expect(e).toBeNull(), //=>
+				Undefined: (e) => expect(e).toBeUndefined(), //=>
+				Boolean: (e) => expect(e).toBeTrue(), //=>
+				Number: (e) => expect(e).toBe(0), //=>
+				Bigint: (e) => expect(e).toBeTypeOf("bigint"), //=>
+				String: (e) => expect(e).toBe("string"), //=>
+				Symbol: (e) => expect(e).toBe(tests.Symbol), //=>
+				FixedObject: (e) => expect(e).toBe({ key: "value" }), //=>
+				Object: (e) => expect(e).toMatchObject({ key: "value" }), //=>
+				FixedArray: (e) => expect(e).toBeArrayOfSize(3), //=>
+				Array: (e) => expect(e).toBeArray(), //=>
 			});
 		});
 	}
