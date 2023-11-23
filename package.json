@@ -2,7 +2,7 @@
   "name": "@oofdere/crabrave",
   "module": "index.ts",
   "type": "module",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "MIT",
   "devDependencies": {
     "@biomejs/biome": "1.3.3",
