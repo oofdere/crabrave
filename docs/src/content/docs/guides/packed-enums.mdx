@@ -1,0 +1,311 @@
+---
+title: Packed Enums
+description: Finally, some good enumerations.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+The headlining feature here has to be packed enums. You can think of these as regular enums, except that instances of them can also hold onto other data.
+
+## The problem with vanilla TS enums
+The following is a standard TypeScript enum:
+
+```ts
+enum ColorEnum {
+    Red,
+    Green,
+    Blue
+}
+```
+
+We can use it like this:
+
+```ts
+const red = ColorEnum.Red
+const green = ColorEnum.Green
+const blue = ColorEnum.Blue
+
+red === ColorEnum.Red // true
+red === ColorEnum.Green // false
+```
+
+Pretty simple, right? But what if we wanted to store the intensity of that color as well? Well, we could maybe make a type:
+
+```ts
+type Color = {
+    color: ColorEnum,
+    value: number
+}
+
+const red: Color = {
+    color: ColorEnum.Red,
+    value: 128
+}
+```
+
+Let's also make a function that takes a `Color` and makes it into an `[R, G, B]` tuple.
+
+```ts
+function toRGB(color: Color) {
+  switch (color.color) {
+    case ColorEnum.Red: return [color.value, 0, 0]
+    case ColorEnum.Green: return [0, color.value, 0]
+    case ColorEnum.Blue: return [0, 0, color.value]
+  }
+}
+
+console.log(toRGB(red)) // [ 128, 0, 0 ]
+```
+
+And that looks fine at first, but what if our client comes to us and kindly informs us of the following:
+
+> MAKE IT SO I CAN USE RGB VALUES OR YOU'RE FIRED!
+
+Well, ok, can't be too hard. Let's just add Hex to our enum...
+
+```diff lang="ts"
+enum ColorEnum = {
+    Red,
+    Green,
+    Blue,
++    Hex
+}
+```
+
+And update our type:
+
+```diff lang="ts"
+type Color = {
+    color: ColorEnum,
+-    value: number
++    value: ???
+}
+```
+
+*Wait, what should our type be?*
+
+ - `string`? *I guess it would work if I change all the code that's written to handle `number`s.*
+ - `number | string`? *A bit nicer, but what if someone tries to set a number for a hex value?*
+ - `class Color` with conversion functions? *Bloat much?*
+ - `any`? *Yeah, no.*
+
+And even if you do all the changes to handle hex today, what are you going to do tomorrow when they ask you for hexadecimal and HSL and HSV and alpha channels and who knows what else? 
+
+**Packed Enums**, that's how! Let's work through the same example with one.
+
+## How Packed Enums fix everything
+
+Import the library like this:
+
+```ts
+import { type Enum, match, pack } from '@oofdere/crabrave'
+```
+
+Let's start by initializing the enum again:
+
+<Tabs>
+  <TabItem label="TypeScript">
+    ```ts
+    type Colors = {
+	    Red: number;
+	    Blue: number;
+	    Green: number;
+    };
+    ```
+  </TabItem>
+  <TabItem label="Rust equivalent">
+    ```rs
+    enum Color {
+      Red(u8),
+      Green(u8),
+      Blue(u8)
+    }
+    ```
+  </TabItem>
+</Tabs>
+
+Some things to take note of:
+ 1. As you can see, this is just a standard type.
+ 2. The keys of the enum are the types they store.
+ 3. It's very similar to Rust's enums.
+
+We can use it like this:
+
+<Tabs>
+  <TabItem label="TypeScript">
+    ```ts
+    const red = pack<Colors>("Red", 128) //=> const red: Enum<Colors>
+    const green = pack<Colors>("Blue", 128) //=> const green: Enum<Colors>
+    const blue = pack<Colors>("Green", 128) //=> const blue: Enum<Colors>
+
+    // equality checking will be implemented later
+    ```
+  </TabItem>
+  <TabItem label="Rust equivalent">
+    ```rs
+    let red = Colors.Red(128)
+    let green = Colors.Green(128)
+    let blue = Colors.Blue(128)
+    ```
+  </TabItem>
+</Tabs>
+
+`pack<Enum>(k, v)` takes in an `Enum` and packs it into an object based on the `key` and `value` of that specific enum entry. This means you get autocomplete in your IDE for both `key` and `value`.
+
+Not as clean as the default TS enum syntax, but note that we passed the intensity into `pack()`, which means we don't have to define `type Color` like we did before.
+
+Now let's make that toRGB function again:
+```ts
+function toRGB(color: Enum<Colors>) { // returns number[]
+	return match(color, {
+		Red: (x) => [x, 0, 0], //=> (property) Red: (x: number) => number[]
+		Green: (x) => [0, x, 0], //=> (property) Green: (x: number) => number[]
+		Blue: (x) => [0, 0, x], //=> (property) Blue: (x: number) => number[]
+	});
+}
+
+console.log(toRGB(blue)); // [ 0, 0, 128 ]
+```
+
+Great! We have all the functionality of the original again! Now let's start implementing hex colors by updating our Color enum:
+
+```diff lang="ts"
+type Colors = {
+	Red: number;
+	Blue: number;
+	Green: number;
++	Rgb: [number, number, number];
+};
+```
+
+TypeScript will start screaming at us as soon as we do this:
+
+```bash title="tsc" del="Property 'Rgb' is missing in type"
+colors.ts:16:22 - error TS2345: Argument of type '{ Red: (x: number) => number[]; Green: (x: number) => number[]; Blue: (x: number) => number[]; }' is not assignable to parameter of type 'Functionify<Colors>'.
+  Property 'Rgb' is missing in type '{ Red: (x: number) => number[]; Green: (x: number) => number[]; Blue: (x: number) => number[]; }' but required in type 'Functionify<Colors>'.
+```
+
+This might look intimidating at first, but it's TypeScript telling us that our `match()` call doesn't handle the `Rgb` case we just added to our enum.
+
+The same thing will happen if we try to pack an invalid value into `Rgb`:
+
+```ts del="\"Rgb\", 128"
+const rgb = pack<Colors>("Rgb", 128) //=> const rgb: Enum<Colors>
+```
+
+The TypeScript compiler will tell us what we did wrong in three different ways:
+
+```bash title="tsc" {2-4}
+Argument of type '["Rgb", 128]' is not assignable to parameter of type 'EnumUnion<Colors>'.
+  Type '["Rgb", 128]' is not assignable to type '["Rgb", [number, number, number]]'.
+    Type at position 1 in source is not compatible with type at position 1 in target.
+      Type 'number' is not assignable to type '[number, number, number]'.ts(2345)
+```
+
+Valid values obviously work:
+
+```ts ins="\"Rgb\", [128, 128, 128]"
+const rgb = pack<Colors>("Rgb", [128, 128, 128]) //=> const rgb: Enum<Colors>
+```
+
+```diff lang="ts"
+function toRGB(color: Enum<Colors>) {
+	return match(color, {
+		Red: (x) => [x, 0, 0], //=> (property) Red: (x: number) => number[]
+		Green: (x) => [0, x, 0], //=> (property) Green: (x: number) => number[]
+		Blue: (x) => [0, 0, x], //=> (property) Blue: (x: number) => number[]
++		Rgb: (x) => x //=> (property) Rgb: (x: [number, number, number]) => [number, number, number]
+	});
+}
+```
+
+This works, but the return type is now `number[] | [number, number, number]`, which isn't ideal. We can work around this with the `as` keyword:
+
+```diff lang="ts" ins="as [number, number, number]"
+function toRGB(color: Enum<Colors>) {
+	return match(color, {
+		Red: (x) => [x, 0, 0], //=> (property) Red: (x: number) => number[]
+		Green: (x) => [0, x, 0], //=> (property) Green: (x: number) => number[]
+		Blue: (x) => [0, 0, x], //=> (property) Blue: (x: number) => number[]
+		Rgb: (x) => x //=> (property) Rgb: (x: [number, number, number]) => [number, number, number]
+	}) as [number, number, number];
+}
+```
+
+Another option is to return `Enum<Colors>`, which is useful if you want to keep using the functions built to handle the enum:
+
+```ts
+function toRGB(color: Enum<Colors>) { // returns Enum<Colors>
+	return match(color, {
+		Red: (x) => pack<Colors>("Rgb", [x, 0, 0]), //=> (property) Red: (x: number) => Enum<Colors>
+		Green: (x) => pack<Colors>("Rgb", [0, x, 0]), //=>
+		Blue: (x) => pack<Colors>("Rgb", [0, 0, x]), //=>
+		Rgb: (x) => pack<Colors>("Rgb", x) //=>
+	});
+}
+
+console.log(toRGB(blue).v);
+```
+
+Both are fine, do whichever makes more sense for your project.
+
+And of course, fearlessly add new features, knowing the compiler will tell you exactly where your code needs to be updated to handle them:
+
+```ts
+type Colors = {
+	Red: number;
+	Blue: number;
+	Green: number;
+	Rgb: [number, number, number];
+	Rgba: [number, number, number, number];
+	Hsl: {
+		hue: number,
+		saturation: number,
+		lightness: number
+	},
+	Css: string,
+	None: null
+};
+```
+
+```bash wrap
+colors.ts:26:22 - error TS2345: Argument of type '{ Red: (x: number) => Enum<Colors>; Green: (x: number) => Enum<Colors>; Blue: (x: number) => Enum<Colors>; Rgb: (x: [number, number, number]) => Enum<...>; }' is not assignable to parameter of type 'Functionify<Colors>'.
+  Type '{ Red: (x: number) => Enum<Colors>; Green: (x: number) => Enum<Colors>; Blue: (x: number) => Enum<Colors>; Rgb: (x: [number, number, number]) => Enum<...>; }' is missing the following properties from type 'Functionify<Colors>': Rgba, Hsl, Css, None
+```
+
+## (Almost) Zero-cost
+This is how TypeScript compiles the `ColorEnum` we built earlier:
+ 
+```ts
+"use strict";
+var ColorEnum;
+(function (ColorEnum) {
+    ColorEnum[ColorEnum["Red"] = 0] = "Red";
+    ColorEnum[ColorEnum["Green"] = 1] = "Green";
+    ColorEnum[ColorEnum["Blue"] = 2] = "Blue";
+})(ColorEnum || (ColorEnum = {}));
+```
+
+And this is how it compiles a crabrave enum:
+
+```ts
+// this space intentionally left empty
+```
+
+And in fact, the entirety of the enum logic compiles down to just this:
+
+```ts
+// src/enum.ts
+function pack(...entry) {
+  return { k: entry[0], v: entry[1] };
+}
+function match(pattern, arms) {
+  return arms[pattern.k](pattern.v);
+}
+export {
+  pack,
+  match
+};
+```
+
+The magic is in the type system, and that's what vanilla TS enums miss.
