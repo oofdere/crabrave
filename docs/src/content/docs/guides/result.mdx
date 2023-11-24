@@ -1,0 +1,123 @@
+---
+title: Results gently pass errors
+description: going to add one later
+---
+
+Very much a WIP. You'll have to excuse my formatting and broken code samples as I was writing in my phone's notes app in bed. When is Vercel dropping `npm i sleep`?
+
+Function to take n and total and return it a percentage (so a number between 0 and 100)
+
+```ts
+function percent(n: number, total: number) {
+    return `${n/total}%`;
+}
+
+console.log(percentage(1, 2)) // 0
+console.log(percentage(1, 2)) // 50
+console.log(percentage(2, 2)) // 100
+```
+
+It works! And TypeScript looks pretty happy doesn't it! Not a single squiggly line in sight!
+
+Job well done, right?
+
+Not so fast. `percent()` can be called in unsafe ways without raising any flags:
+
+ - `percentage(2, 1)` will return 200
+ - `percentage(-1, 2)` will return -50
+ - **`percentage(0, 0)` will return `Infinity`!**
+
+So now your beautiful succinct function turns into this monstrosity:
+
+```ts
+type percentErrors = "DivByZero" | "TotalLessThanN" | "NegativeResult"
+
+function percent(n: number, total: number) {
+    if (total < n) { throw "TotalLessThanN" }
+    if (total === 0) { throw "DivByZero" }
+    
+    const p = return n / total;
+    
+    if (p < 0) { throw "NegativeResult" }
+
+    return `${p}%`
+}
+```
+
+And the errors can be handled like so:
+
+```ts
+try {
+    console.log(percentage(i, j))
+} catch (error) {
+    switch error {
+        case "DivByZero":
+            console.log("0%")
+            break
+        case "TotalLessThanN":
+            console.log("100%")
+            break
+        case "NegativeResult":
+            console.log("0%")
+            break
+    }
+}
+```
+
+But it's fine, now your code has no undefined behavior! What a good programmer you are! Want a treat? Want a tasty, juicy `TypeError`?
+
+Let me just throw that `TypeError` you wanted so much right at your face you fu-
+
+<hr />
+
+Sorry, sorry, I've been traumatized by exceptions. I'm sorry for lashing out at you, it's not your fault. You didn't design the language. I'm sorry.
+
+The problem is that you have to expect everyone to handle all the errors your function might throw:
+
+```ts
+try {
+    console.log(percentage(i, j))
+} catch (error) {
+    switch error {
+        case "DivByZero":
+            console.log("0%")
+            break
+        case "TotalLessThanN":
+            console.log("100%")
+            break
+        case "NegativeResult":
+            console.log("0%")
+            break
+    }
+}
+```
+
+This is really ugly, but if you could assign a type to the `error` in the catch block, it would be fine. The compiler would tell you what errors to handle.
+
+But since `error` is always typed as `any`, and you don't have every possible throw value memorized, you'll probably do this instead:
+
+```ts
+try {
+    console.log(percentage(i, j))
+} catch (error) {
+    console.log(error)
+}
+```
+
+And you're only going to do that after this throws in production on a Saturday at 2 AM and you're trying to figure out why this function even threw because there's no way to specify that it even could throw:
+
+```ts
+console.log(percentage(i, j))
+```
+
+JavaScript tells you:
+
+>Types? You're acting like you haven't memorized every line of code in your `node_modules` folder. Kinda sus.
+
+TypeScript goes:
+
+>What, you don't know every possible error the libraries you use can throw? I'm already handling all these types and you want me to help with errors too? Can't you do anything on your own? Pathetic.
+
+I think there's a nicer way.
+
+WHAT A CLIFFHANGER AMIRITE it's almost 3 am I should really sleep thanks for reading
