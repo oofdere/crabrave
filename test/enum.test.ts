@@ -6,7 +6,7 @@ type Tests = {
 	Undefined: undefined;
 	Boolean: true;
 	Number: number;
-	Bigint: bigint;
+	BigInt: bigint;
 	String: string;
 	Symbol: symbol;
 	FixedObject: { key: "value" };
@@ -21,7 +21,7 @@ const tests = {
 	Undefined: undefined,
 	Boolean: true,
 	Number: 0,
-	Bigint: Number.MAX_SAFE_INTEGER + 1,
+	BigInt: Number.MAX_SAFE_INTEGER + 1,
 	String: "string",
 	Symbol: Symbol("symbol"),
 	FixedObject: { key: "value" },

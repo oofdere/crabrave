@@ -1,15 +1,15 @@
 import { expect, test } from "bun:test";
 
-import { Option, Some, None } from "../index";
+import { Option, Some, None, match } from "../index";
 
 test("init_some", () => {
 	const option = Some(0);
-	expect(option.value).toBe(0);
+	expect(option.v).toBe(0);
 });
 
 test("init_none", () => {
 	const option = None<number>();
-	expect(option.value).toBe(null);
+	expect(option.v).toBe(void 0);
 });
 
 test("unwrap_some", () => {
@@ -27,21 +27,19 @@ test("unwrap_none", () => {
 test("match_some", () => {
 	const option = Some(0);
 
-	option.match(
-		(data) => expect(data).toBe(0),
-		() => {
-			throw 1;
-		},
-	);
+	match(option, {
+		Some: (x) => expect(x).toBe(0),
+		None: () => {
+			throw 1
+		}
+	});
 });
 
 test("match_none", () => {
 	const option = None<number>();
 
-	option.match(
-		(data) => {
-			throw 1;
-		},
-		() => 0,
-	);
+	match(option, {
+		Some: (x) => expect().fail(),
+		None: () => expect().pass()
+	});
 });

@@ -1,43 +1,32 @@
-type Some<T> = T;
+import { Enum } from "./enum";
 
-type None = null;
+export type OptionEnum<T> = {
+	Some: T,
+	// biome-ignore lint/suspicious/noConfusingVoidType: makes sense to use here, I think, since it's a type that can never hold a value
+	None: void
+}
 
-type _Option<T> = Some<T> | None;
+interface Option<T> extends Enum<OptionEnum<T>> {
+	unwrap: (this: Option<T>) => T;
+}
 
-export class Option<T> {
-	private option: _Option<T>;
+function unwrap<T>(this: Option<T>) {
+	if (this.k === "Some") return this.v as T
+	throw TypeError(`Unwrapped an Option that contained None(): ${JSON.stringify(this)}`)
+}
 
-	constructor(option: _Option<T>) {
-		this.option = option;
-	}
-
-	public get value(): Some<T> | None {
-		return this.option;
-	}
-
-	static some<T>(data: T): Option<T> {
-		return new Option(data);
-	}
-
-	static none<T>(): Option<T> {
-		return new Option<T>(null);
-	}
-
-	unwrap(): T {
-		if (this.option === null) {
-			throw new Error("Failed to unwrap!");
-		}
-		return this.option;
-	}
-
-	match<U, V>(some: (data: T) => U, none: () => V): U | V {
-		if (this.option === null) {
-			return none();
-		} else {
-			return some(this.option);
-		}
+export function Some<T>(val: T): Option<T> {
+	return {
+		k: "Some",
+		v: val,
+		unwrap,
 	}
 }
 
-export const Some = Option.some;
-export const None = Option.none;
+export function None<T>(_val?: T): Option<T> {
+	return {
+		k: "None",
+		v: void 0,
+		unwrap,
+	}
+}
