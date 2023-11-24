@@ -55,7 +55,7 @@ describe("matching", () => {
 				Undefined: (e) => expect(e).toBeUndefined(), //=>
 				Boolean: (e) => expect(e).toBeTrue(), //=>
 				Number: (e) => expect(e).toBe(0), //=>
-				Bigint: (e) => expect(e).toBeTypeOf("bigint"), //=>
+				BigInt: (e) => expect(e).toBeTypeOf("bigint"), //=>
 				String: (e) => expect(e).toBe("string"), //=>
 				Symbol: (e) => expect(e).toBe(tests.Symbol), //=>
 				FixedObject: (e) => expect(e).toBe({ key: "value" }), //=>

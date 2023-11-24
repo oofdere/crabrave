@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 
-import { Option, Some, None, match } from "../index";
+import { Some, None, match } from "../index";
 
 test("init_some", () => {
 	const option = Some(0);
@@ -28,8 +28,8 @@ test("match_some", () => {
 	const option = Some(0);
 
 	match(option, {
-		Some: (x) => expect(x).toBe(0),
-		None: () => {
+		Some: (x) => expect(x).toBe(0), //=>
+		None: (x) => { //=>
 			throw 1
 		}
 	});
@@ -39,7 +39,7 @@ test("match_none", () => {
 	const option = None<number>();
 
 	match(option, {
-		Some: (x) => expect().fail(),
-		None: () => expect().pass()
+		Some: (x) => expect().fail(), // =>
+		None: () => expect().pass() //=>
 	});
 });

@@ -15,15 +15,15 @@ function unwrap<T>(this: Option<T>) {
 	throw TypeError(`Unwrapped an Option that contained None(): ${JSON.stringify(this)}`)
 }
 
-export function Some<T>(val: T): Option<T> {
+export function Some<T>(v: T): Option<T> {
 	return {
 		k: "Some",
-		v: val,
+		v,
 		unwrap,
 	}
 }
 
-export function None<T>(_val?: T): Option<T> {
+export function None<T>(_v?: T): Option<T> {
 	return {
 		k: "None",
 		v: void 0,
