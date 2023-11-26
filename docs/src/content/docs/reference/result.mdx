@@ -1,0 +1,123 @@
+---
+title: Result<T, E>
+description: "Gently return errors instead of rudely throwing them using `Result<T, E>`"
+---
+
+Gently return errors instead of rudely throwing them using `Result<T, E>`
+
+:::danger
+This *almost* works perfectly. Logically, it's fine, but there's a nasty type checking bug that I can't get to the bottom of yet: When `T` and `E` are both of the same type, the arms don't infer the input types.
+
+```ts
+const r = Ok<number, number>(0)
+
+// expected types
+match(r, {
+    Ok: (x) => x, //=> (x: number) => number
+    Err: (x) => console.log(x) //=> (x: number) => void
+})
+
+// bugged types
+match(r, {
+    Ok: (x) => x, //=> (x: any) => number
+    Err: (x) => console.log(x) //=> (x: any) => void
+})
+```
+
+Logically this still works, but TypeScript will be calling you an idiot sandwich.
+
+If you use two sufficiently different types (type aliases have the same issue, for instance) the issue goes away, even if those types are `number` and `Number`:
+
+```ts
+const r = Ok<number, Number>(0)
+
+// works perfectly fine for some reason!
+match(r, {
+    Ok: (x) => x, //=> (x: number) => number
+    Err: (x) => console.log(x) //=> (x: Number) => void
+})
+```
+
+I have no idea why this happens but it's unacceptable and fixing it is my main priority right now.
+:::
+
+## Creating a `Result<T, E>` instance
+
+To create a Result, use the `Ok()` and `Err()` functions.
+
+```ts
+import { Ok, Err } from "@oofdere/crabrave";
+
+const ok = Ok<string, number>("success");
+const err = Err<string, number>(1);
+```
+
+You'll generally want to create `Result<T, E>` instances inside functions and return them, like so:
+
+```ts
+import { Ok, Err, Resultm Enum, pack } from "@oofdere/crabrave";
+
+type PercentError = {
+    DivByZero: number,
+    TotalLessThanN: number,
+    NegativeResult: number
+}
+
+function percent(n: number, total: number): Result<number, Enum<PercentError>> {
+    const p = n / total * 100;
+
+    if (total < n) return Err(pack("TotalLessThanN", p));
+    if (total === 0) return Err(pack("DivByZero", p));
+    if (p < 0) return Err(pack("NegativeResult", p));
+
+    return Ok(p);
+```
+
+TypeScript successfully infers all of our return types when using packed enums, so no need to pass generics!
+
+## Using a `Result<T, E>` instance
+
+Now let's assume that we're using the `percent()` function we just created in a library:
+
+```ts
+import { percent } from "percentString";
+
+const half = percent(1, 2); //=> Result<string, PercentErrors>
+console.log(half); // "Ok"
+
+const double = percent(2, 1); //=> Result<string, PercentErrors>
+console.log(double); // "Err"
+```
+
+Notice that despite `half` containing an `Ok` result and `double` containing an `Err` result, they still have the same type.
+
+To get our value out of the `Result`, we can use `match()`:
+
+```ts
+const half = percent(1, 2); //=> Result<string, PercentErrors>
+const half_str = match(half, {
+    Ok: (x) => `${x}%`,
+    Err: () => "Something went wrong."
+})
+console.log(half_str) // "50%"
+```
+
+### `unwrap()`: Useful in a pinch, but please don't use it in prod
+
+A simpler, but unsafe way of extracting the value is to use the `unwrap()` function:
+
+```ts
+
+```
+
+Really simple, right? Why deal with all the extra code and overhead of that matching nonsense when you can just unwrap your value like a present?
+
+Well, the problem is that this present might throw a grenade at you when you open it:
+
+```ts
+
+```
+
+You should only use `unwrap()` if you're absolutely, positively sure that the function will not return an `Err`, and it's best saved for prototyping, after which you can replace them with `match()` statements to make them safer.
+
+Avoid `unwrap()` in production.
