@@ -2,36 +2,54 @@
 type Keys<E> = keyof E;
 type Values<E> = E[keyof E];
 
-// packs the container for entries in the enum
-// might be replaced with something else (tuple?) later on
-type Pack<K, V> = {
-	k: K;
-	v: V;
-};
-
-// creates a union of all possible types from an enum
-export type Enum<E> = Pack<Keys<E>, Values<E>>;
+// type to mess around with
+type Test = {
+	str: string,
+	num: number,
+	nul: null,
+	union: string | number,
+	opt?: number
+}
 
 // same as above, but creates [key, type] objects, which means the types of keys are enforced during type checking
-type EnumUnion<E> = {
-	[K in keyof E]: [K, E[K]];
+type Enum<E> = {
+	[K in keyof E]-?: [K, E[K]];
 }[keyof E];
 
-// creates an object type to be used for matching
-type Functionify<T> = {
-	// biome-ignore lint/suspicious/noExplicitAny: users can use any return value, this is accounted for
-	[K in keyof T]: (val: T[K]) => any;
-};
+type TestEnum = Enum<Test>
 
-// and these two functions are the only things you see in the compiled output
-export function pack<E extends object>(...entry: EnumUnion<E>): Enum<E> {
-	return { k: entry[0], v: entry[1] };
+type EnumTypes<E> = {
+	[K in keyof E]: E[K]
+}[keyof E]
+
+// type to create the matching arms used in the match function
+type ArmsExhaustive<E> = {
+	// "-?" removes any optional parameters, making all cases required
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	[K in keyof E]-?: (x: E[K]) => any
 }
 
-export function match<E, Fn extends Functionify<E>>(
+// type to create the matching arms used in the match function
+type ArmsPartial<E> = {
+	// "?" makes all cases optional
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	[K in keyof E]?: (x: E[K]) => any
+} & {
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	defaultCase: (x: EnumTypes<E>) => any
+}
+
+export function match<E>(
 	pattern: Enum<E>,
-	arms: Fn,
-): ReturnType<typeof arms[keyof typeof arms]> {
-	// biome-ignore lint/suspicious/noExplicitAny: function is safe with other guard rails present to prevent values that don't match the function type
-	return arms[pattern.k](pattern.v as any);
+	arms: ArmsExhaustive<E>
+): ReturnType<ArmsExhaustive<E>[keyof typeof arms]>
+
+export function match<E>(
+	pattern: Enum<E>,
+	arms: ArmsPartial<E>,
+): ReturnType<ArmsExhaustive<E>[keyof typeof arms] | ReturnType<typeof arms.defaultCase> {
+	return arms[pattern[0]] ? arms[pattern[0]](pattern[1]) : arms.defaultCase(pattern[1])
 }
+
+const a: Enum<Test> = ["str", "string"]
+const b: Enum<Test> = ["num", 1]
