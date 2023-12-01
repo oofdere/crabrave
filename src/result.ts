@@ -6,9 +6,15 @@ export type ResultEnum<T, E> = {
 }
 
 
-interface Result extends Enum<ResultEnum<T, E>> {
+interface Result<T, E> extends Enum<ResultEnum<T, E>> {
 	unwrap: (this: Result<T, E>) => T;
 }
+
+function unwrap<T, E>(this: Result<T, E>) {
+	
+}
+
+
 
 type Ok<T> = {
 	status: "ok";
@@ -23,7 +29,7 @@ type Err<E> = {
 type _Result<T, E> = Ok<T> | Err<E>;
 
 export class Result<T, E> implements Enum<ResultEnum<T, E>> {
-	private result: Enum<ResultEnum<T, E>>;
+	private result: _Result<T, E>;
 
 	constructor(result: _Result<T, E>) {
 		this.result = result;
@@ -34,18 +40,20 @@ export class Result<T, E> implements Enum<ResultEnum<T, E>> {
 	}
 
 	static Ok<T, E>(v: T, _z?: E): Result<T, E> {
-		return new Result({
-			k: "Ok",
-			v,
-		})
+	return {
+		k: "Ok",
+		v,
+		unwrap,
 	}
+}
 
 	static Err<T, E>(v: E, _z?: T): Result<T, E> {
-		return {
-			k: "Err",
-			v,
-		}
+	return {
+		k: "Err",
+		v,
+		unwrap,
 	}
+}
 
 	unwrap(): T {
 		if (this.k === "Ok") return this.v as T

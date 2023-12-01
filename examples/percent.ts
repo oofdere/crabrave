@@ -16,12 +16,17 @@ function percent(n: number, total: number): Result<number, Enum<PercentError>> {
     return Ok(p);
 }
 
-const half = percent(1, 2); //=> Result<string, PercentErrors>
-const half_str = match(half, {
-    Ok: (x) => `${x}%`,
-    Err: () => "Something went wrong."
-})
-console.log(half_str)
+function stringify_percent(res: Result<string, Enum<PercentError>>) {
+    match(res, {
+        Ok: (x) => `${x}%`,
+        Err: () => "Something went wrong."
+    })
+}
 
-const double = percent(2, 1); //=> Result<string, PercentErrors>
-console.log(double.k);
+const half = percent(1, 2);
+const half_str = stringify_percent(half);
+console.log(half_str);
+
+const double = percent(2, 1);
+const double_str = stringify_percent(half);
+console.log(double_str);
