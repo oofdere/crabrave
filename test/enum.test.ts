@@ -36,7 +36,7 @@ describe("packing", () => {
 	for (const k in tests) {
 		test(k, () => {
 			const packed = pack<Tests>(k, tests[k]);
-			expect(packed).toStrictEqual({ k, v: tests[k] });
+			expect(packed).toStrictEqual([k, tests[k]]);
 		});
 	}
 });
@@ -49,7 +49,7 @@ describe("matching", () => {
 	}
 
 	for (const p of packs) {
-		test(p.k, () => {
+		test(p[0], () => {
 			match(p, {
 				Null: (e) => expect(e).toBeNull(), //=>
 				Undefined: (e) => expect(e).toBeUndefined(), //=>
@@ -63,6 +63,7 @@ describe("matching", () => {
 				FixedArray: (e) => expect(e).toBeArrayOfSize(3), //=>
 				Array: (e) => expect(e).toBeArray(), //=>
 			});
+			expect().fail()
 		});
 	}
 });
