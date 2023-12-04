@@ -11,6 +11,10 @@ type Arms<E> = {
 	[K in keyof Exclude<E>]-?: (x: E[K]) => any
 }
 
+type PartialArms<E, T> = {
+	[K in keyof Exclude<E>]?: (x: E[K]) => T
+}
+
 // this is the recommended way to create enum instances so you have strong type checking
 export const pack = <E>(...entry: EnumChecked<E>): Enum<E> => entry
 
@@ -20,11 +24,20 @@ export const match = <E, Fn extends Arms<E>>(
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 ): ReturnType<typeof arms[keyof typeof arms]> => arms[pattern[0]](pattern[1] as any)
 
+export const matchPartial = <E, T>(
+	pattern: Enum<E>,
+	arms: PartialArms<E, T>,
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	fallback: (_: any) => T
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+): T => (arms[pattern[0]] as any || fallback)(pattern[1] as any)
+
+
 // type to mess around with
 type Test = {
 	str: string,
 	num: number,
-	readonly excl: (...any) => any
+	aaa: null
 }
 
 // https://stackoverflow.com/a/52473108
@@ -37,16 +50,23 @@ type Exclude<T> = Pick<T, {
 	[P in keyof T]: IfEquals<{ [Q in P]: T[P] }, { -readonly [Q in P]: T[P] }> extends true ? P : never
 }[keyof T]>
 
+// this extracts the functions to be added to the prototype
+type Include<T> = Pick<T, {
+	// mark everything as readonly
+	[P in keyof T]: IfEquals<{ [Q in P]: T[P] }, { readonly [Q in P]: T[P] }> extends true ? P : never
+}[keyof T]>
+
 type TestExclude = Exclude<Test>
 
 const a: Enum<Test> = ["str", "string"]
-const b: Enum<Test> = ["num", 1]
-const e = match(b, { //=>
+const b: Enum<Test> = ["aaa", null]
+const e = matchPartial(b, { //=>
 	str: (x) => x, //=>
 	num: (x) => `${x}`, //=>
-}) //=>
+},
+	(_) => "caught!"
+) //=>
 
-const g = pack<Test>("excl", () => { })
-
+console.log(e)
 // remove readonly to recover the readable properties
 
