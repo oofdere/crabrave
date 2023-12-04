@@ -1,2 +1,5 @@
 test/
 docs/
+examples/
+node_modules/
+bun.lockb

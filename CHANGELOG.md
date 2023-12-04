@@ -1,5 +1,16 @@
 # @oofdere/crabrave
 
+## 0.2.0
+
+### Minor Changes
+
+- kinda redid everything
+
+### Patch Changes
+
+- 36850a7: completely reimplemented Option<T> based on Enum; API now uses top-level match
+- 2f77d84: drastically simplify enum implementation while keeping mostly the same api
+
 ## 0.1.1
 
 ### Patch Changes
