@@ -6,14 +6,14 @@ type Error = 1;
 
 test("init_ok", () => {
 	const result = Ok<number, number>(0);
-	expect(result.k).toBe("Ok");
-	expect(result.v).toBe(0);
+	expect(result[0]).toBe("Ok");
+	expect(result[1]).toBe(0);
 });
 
 test("init_err", () => {
 	const result = Err<number, number>(1);
-	expect(result.k).toBe("Err");
-	expect(result.v).toBe(1);
+	expect(result[0]).toBe("Err");
+	expect(result[1]).toBe(1);
 });
 
 test("unwrap_ok", () => {

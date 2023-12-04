@@ -4,12 +4,13 @@ import { Some, None, match } from "../index";
 
 test("init_some", () => {
 	const option = Some(0);
-	expect(option.v).toBe(0);
+	expect(option[0]).toBe("Some");
+	expect(option[1]).toBe(0);
 });
 
 test("init_none", () => {
 	const option = None<number>();
-	expect(option.v).toBe(void 0);
+	expect(option[1]).toBe(null);
 });
 
 test("unwrap_some", () => {

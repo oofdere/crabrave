@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { Enum, match, pack } from "..";
+import { Enum, match, pack, matchPartial, EnumChecked } from "..";
 
 type Tests = {
 	Null: null;
@@ -66,4 +66,17 @@ describe("matching", () => {
 			expect().fail()
 		});
 	}
+
+	describe("partial", () => {
+		for (const k in tests) {
+			test(k, () => packs.push(pack<Tests>(k, tests[k])));
+		}
+
+		for (const p of packs) {
+			test(p[0], () => {
+				matchPartial(p, {}, () => expect().pass());
+				expect().fail()
+			});
+		}
+	})
 });
