@@ -1,6 +1,6 @@
 ---
 title: Packed Enums
-description: Finally, some good enumerations.
+description: Finally, some good forking enumerations.
 ---
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
@@ -296,16 +296,20 @@ And in fact, the entirety of the enum logic compiles down to just this:
 
 ```ts
 // src/enum.ts
-function pack(...entry) {
-  return { k: entry[0], v: entry[1] };
-}
-function match(pattern, arms) {
-  return arms[pattern.k](pattern.v);
-}
+var pack = (...entry) => entry;
+var match = (pattern, arms) => arms[pattern[0]](pattern[1]);
+var matchPartial = (pattern, arms, fallback) => (arms[pattern[0]] || fallback)(pattern[1]);
 export {
   pack,
+  matchPartial,
   match
 };
 ```
+
+Or, after minification: `var o=(...i)=>i,w=(i,u)=>u[i[0]](i[1]),x=(i,u,d)=>(u[i[0]]||d)(i[1]);export{o as pack,x as matchPartial,w as match};` (116 bytes)
+
+This is a cost you pay once across your whole entire project, and then you can make and use as many enums as you'd like without any additional penalty.
+
+<hr />
 
 The magic is in the type system, and that's what vanilla TS enums miss.
