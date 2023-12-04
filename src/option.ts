@@ -1,4 +1,5 @@
 import { Enum } from "./enum";
+import "./unwrap";
 
 export type Option<T> = {
 	Some: T,

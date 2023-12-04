@@ -1,4 +1,5 @@
 import { Enum } from "./enum";
+import "./unwrap";
 
 export type Result<T, E> = {
 	Ok: T,
