@@ -6,8 +6,10 @@ import { Result } from "./result";
 
 declare global {
 	interface Array<T> {
-		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-		unwrap(this: Enum<Option<T>> | Enum<Result<T, any>>): T;
+		// biome-ignore lint/suspicious/noExplicitAny: function doesn't use E
+		unwrap(this: Enum<Option<T>> | Enum<Result<T, any>>): T,
+		// biome-ignore lint/suspicious/noExplicitAny: fucntion doesn't use E
+		or<E>(this: Enum<Option<T>> | Enum<Result<T, any>>, fallback: E): T,
 	}
 }
 
@@ -16,4 +18,11 @@ Array.prototype.unwrap = function () {
 		return this[1];
 	}
 	throw TypeError(`${this[0]}(): ${this[1]}`);
+};
+
+Array.prototype.or = function (fallback) {
+	if (this[0] === "Some" || this[0] === "Ok") {
+		return this[1];
+	}
+	return fallback;
 };

@@ -28,6 +28,16 @@ test("unwrap_err", () => {
 	}).toThrow();
 });
 
+test("unwrapOr_ok", () => {
+	const result = Ok<number, number>(0);
+	expect(result.unwrapOr(1)).toBe(0);
+});
+
+test("unwrapOr_err", () => {
+	const result = Err<number, number>(2);
+	expect(result.unwrapOr(1)).toBe(1);
+});
+
 test("match_ok", () => {
 	const result = Ok<number, number>(0);
 	match(result, {
