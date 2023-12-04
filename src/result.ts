@@ -5,10 +5,5 @@ export type Result<T, E> = {
 	Err: E
 }
 
-export function Ok<T, E>(ok: T, _err: E): Enum<Result<T, E>> {
-	return ["Ok", ok]
-}
-
-export function None<T, E>(_ok: T, err: E): Enum<Result<T, E>> {
-	return ["Err", err]
-}
+export const Ok = <T, E>(ok: T, _err?: E): Enum<Result<T, E>> => ["Ok", ok]
+export const Err = <T, E>(err: E, _ok?: T): Enum<Result<T, E>> => ["Err", err]
