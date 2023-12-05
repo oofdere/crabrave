@@ -5,42 +5,6 @@ description: "Gently return errors instead of rudely throwing them using `Result
 
 Gently return errors instead of rudely throwing them using `Result<T, E>`
 
-:::danger
-This *almost* works perfectly. Logically, it's fine, but there's a nasty type checking bug that I can't get to the bottom of yet: When `T` and `E` are both of the same type, the arms don't infer the input types.
-
-```ts
-const r = Ok<number, number>(0)
-
-// expected types
-match(r, {
-    Ok: (x) => x, //=> (x: number) => number
-    Err: (x) => console.log(x) //=> (x: number) => void
-})
-
-// bugged types
-match(r, {
-    Ok: (x) => x, //=> (x: any) => number
-    Err: (x) => console.log(x) //=> (x: any) => void
-})
-```
-
-Logically this still works, but TypeScript will be calling you an idiot sandwich.
-
-If you use two sufficiently different types (type aliases have the same issue, for instance) the issue goes away, even if those types are `number` and `Number`:
-
-```ts
-const r = Ok<number, Number>(0)
-
-// works perfectly fine for some reason!
-match(r, {
-    Ok: (x) => x, //=> (x: number) => number
-    Err: (x) => console.log(x) //=> (x: Number) => void
-})
-```
-
-I have no idea why this happens but it's unacceptable and fixing it is my main priority right now.
-:::
-
 ## Creating a `Result<T, E>` instance
 
 To create a Result, use the `Ok()` and `Err()` functions.
