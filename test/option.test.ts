@@ -10,7 +10,7 @@ test("init_some", () => {
 
 test("init_none", () => {
 	const option = None<number>();
-	expect(option[1]).toBe(null);
+	expect(option[1]).toBe(undefined);
 });
 
 test("unwrap_some", () => {

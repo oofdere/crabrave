@@ -13,14 +13,16 @@ declare global {
 	}
 }
 
-Array.prototype.unwrap = function () {
+const a = Array.prototype
+
+a.unwrap = function () {
 	if (this[0] === "Some" || this[0] === "Ok") {
 		return this[1];
 	}
 	throw TypeError(`${this[0]}(): ${this[1]}`);
 };
 
-Array.prototype.or = function (fallback) {
+a.or = function (fallback) {
 	if (this[0] === "Some" || this[0] === "Ok") {
 		return this[1];
 	}
