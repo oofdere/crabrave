@@ -27,12 +27,12 @@ test("unwrap_none", () => {
 
 test("unwrapOr_some", () => {
 	const option = Some(0);
-	expect(option.unwrapOr(1)).toBe(0);
+	expect(option.or(1)).toBe(0);
 });
 
 test("unwrapOr_none", () => {
 	const option = None<number>();
-	expect(option.unwrapOr(1)).toBe(1);
+	expect(option.or(1)).toBe(1);
 
 });
 
