@@ -3,18 +3,18 @@ title: Results gently pass errors
 description: going to add one later
 ---
 
-Very much a WIP. You'll have to excuse my formatting and broken code samples as I was writing in my phone's notes app in bed. When is Vercel dropping `npm i sleep`?
+## Traditional JS/TS error handling
 
-Function to take n and total and return it a percentage (so a number between 0 and 100)
+Let's say we want to make a function that calculates a percentage based on `n`, which is the number of points earnes, and `total`, which is the maximum number of points, and then formats that percentage into a string for display:
 
 ```ts
 function percent(n: number, total: number) {
     return `${n/total}%`;
 }
 
-console.log(percentage(1, 2)) // 0
-console.log(percentage(1, 2)) // 50
-console.log(percentage(2, 2)) // 100
+console.log(percent(1, 2)) // "0%"
+console.log(percent(1, 2)) // "50%"
+console.log(percent(2, 2)) // "100%"
 ```
 
 It works! And TypeScript looks pretty happy doesn't it! Not a single squiggly line in sight!
@@ -23,9 +23,9 @@ Job well done, right?
 
 Not so fast. `percent()` can be called in unsafe ways without raising any flags:
 
- - `percentage(2, 1)` will return 200
- - `percentage(-1, 2)` will return -50
- - **`percentage(0, 0)` will return `Infinity`!**
+ - `percent(2, 1)` will return `"200%"`
+ - `percent(-1, 2)` will return `"-50%"`
+ - **`percent(0, 0)` will return `Infinity%`!**
 
 So now your beautiful succinct function turns into this monstrosity:
 
@@ -44,11 +44,11 @@ function percent(n: number, total: number) {
 }
 ```
 
-And the errors can be handled like so:
+And the errors have to be handled like this:
 
 ```ts
 try {
-    console.log(percentage(i, j))
+    console.log(percent(i, j))
 } catch (error) {
     switch error {
         case "DivByZero":
@@ -76,7 +76,7 @@ The problem is that you have to expect everyone to handle all the errors your fu
 
 ```ts
 try {
-    console.log(percentage(i, j))
+    console.log(percent(i, j))
 } catch (error) {
     switch error {
         case "DivByZero":
@@ -98,7 +98,7 @@ But since `error` is always typed as `any`, and you don't have every possible th
 
 ```ts
 try {
-    console.log(percentage(i, j))
+    console.log(percent(i, j))
 } catch (error) {
     console.log(error)
 }
@@ -107,7 +107,7 @@ try {
 And you're only going to do that after this throws in production on a Saturday at 2 AM and you're trying to figure out why this function even threw because there's no way to specify that it even could throw:
 
 ```ts
-console.log(percentage(i, j))
+console.log(percent(i, j))
 ```
 
 JavaScript tells you:
@@ -120,4 +120,97 @@ TypeScript goes:
 
 I think there's a nicer way.
 
-WHAT A CLIFFHANGER AMIRITE it's almost 3 am I should really sleep thanks for reading
+## Handle with care!
+
+If vanilla error handling is equivalent to the way `${DELIVERY_COMPANY}` (mis)handles packages, handling errors with `Result<T, E>` is like going out and manually delivering all your gifts by hand.
+
+Let's re-implement our `percent()` function with `Result<T, E>` now:
+
+```ts
+function percent(n: number, total: number): Enum<Result<string, Enum<PercentError>>> {
+    const p = n / total * 100;
+
+    if (total < n) return Err(pack("TotalLessThanN", p));
+    if (total === 0) return Err(pack("DivByZero", p));
+    if (p < 0) return Err(pack("NegativeResult", p));
+
+    return Ok(`${p}`);
+}
+
+const half = percent(1, 2);
+match(half, {
+    Ok: (x) => console.log("ok:", x),
+    Err: (x) => console.log("error:", x)
+});
+
+const double = percent(2, 1);
+match(double, {
+    Ok: (x) => console.log("ok:", x),
+    Err: (x) => console.log("error:", x)
+});
+```
+
+Running the program will print:
+
+```bash
+[teo@koolaide crabrave]$ bun run examples/percent.ts 
+ok: 50%
+error: [ "TotalLessThanN", 200 ]
+```
+
+Note that the error case is an array of length 2. This is because this is how enums, including the `PercentError` enum we used as the error type, are represented internally. We can nest another `match()` to properly handle all the `PercentError` cases.
+
+```ts
+const double = percent(2, 1);
+match(double, {
+    Ok: (x) => console.log("ok:", x),
+    Err: (err) => match(err, {
+        DivByZero: (x) => console.log("Divided by zero!", `${x}%`),
+        TotalLessThanN: (x) => console.log("Total is less than points earned!", `${x}%`),
+        NegativeResult: (x) => console.log("Negative percentage!", `${x}%`),
+    })
+});
+```
+
+This match statement logs `Total is less than points earned! 200%` to the console.
+
+### Or don't!
+
+Of course, while I don't reccomend it, there is nothing physically stopping you from tossing and throwing your deliveries.
+
+We can update our code like so:
+
+```ts
+const double = percent(2, 1);
+console.log(double.unwrap())
+```
+
+Which would change our output to the following and crash our program:
+
+```bash
+[teo@koolaide crabrave]$ bun run examples/percent.ts 
+TypeError: Err(): TotalLessThanN,200
+      at /home/teo/crabrave/src/unwrap.ts:20:7
+      at /home/teo/crabrave/examples/percent.ts:24:12
+```
+
+### Or at least, have some insurance.
+
+What if you want the brevity of `unwrap()` with the safety of `match()`? You can use `or()`, which lets you specify a fallback value in case of an error:
+
+```ts
+const half = percent(1, 2);
+console.log(half.or("0%"))
+
+
+const double = percent(2, 1);
+console.log(double.or("0%"))
+```
+
+Which makes our program return `"0%"` instead of crashing:
+
+```bash
+[teo@koolaide crabrave]$ bun run examples/percent.ts 
+50%
+0%
+```
