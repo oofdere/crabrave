@@ -1,4 +1,4 @@
-import { defineConfig } from 'astro/config';
+import { defineConfig, passthroughImageService } from 'astro/config';
 import starlight from '@astrojs/starlight';
 
 // https://astro.build/config
@@ -9,5 +9,8 @@ export default defineConfig({
 			social: {
       github: 'https://github.com/oofdere/crabrave'
     }
-  })]
+  })],
+  image: {
+	service: passthroughImageService()
+  }
 });
