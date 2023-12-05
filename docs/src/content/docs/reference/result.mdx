@@ -19,7 +19,7 @@ const err = Err<string, number>(1);
 You'll generally want to create `Result<T, E>` instances inside functions and return them, like so:
 
 ```ts
-import { Ok, Err, Resultm Enum, pack } from "@oofdere/crabrave";
+import { Ok, Err, Result, Enum, pack } from "@oofdere/crabrave";
 
 type PercentError = {
     DivByZero: number,
@@ -27,51 +27,96 @@ type PercentError = {
     NegativeResult: number
 }
 
-function percent(n: number, total: number): Result<number, Enum<PercentError>> {
+function percent(n: number, total: number): Enum<Result<string, Enum<PercentError>>> {
     const p = n / total * 100;
 
     if (total < n) return Err(pack("TotalLessThanN", p));
     if (total === 0) return Err(pack("DivByZero", p));
     if (p < 0) return Err(pack("NegativeResult", p));
 
-    return Ok(p);
+    return Ok(`${p}%`);
+}
 ```
 
 TypeScript successfully infers all of our return types when using packed enums, so no need to pass generics!
 
+:::note
+Make sure to always wrap `Result<T, E>` in `Enum<T>` so the compiler can keep track of it!
+
+```ts
+(): Enum<Result<T, E>> // This is good!
+
+(): Result<T, E> // This will not work!
+```
+:::
+
+
 ## Using a `Result<T, E>` instance
 
-Now let's assume that we're using the `percent()` function we just created in a library:
+Now let's assume that the `percent()` function we just created is part of a library and we want to use it in our code:
 
 ```ts
 import { percent } from "percentString";
 
-const half = percent(1, 2); //=> Result<string, PercentErrors>
-console.log(half); // "Ok"
+const half = percent(1, 2); //=> Enum<Result<string, Enum<PercentErrors>>>
+console.log(half); // [ "Ok", "50%" ]
 
-const double = percent(2, 1); //=> Result<string, PercentErrors>
-console.log(double); // "Err"
+const double = percent(2, 1); //=> Enum<Result<string, Enum<PercentErrors>>>
+console.log(double); // [ "Err", [ "TotalLessThanN", 200 ] ]
 ```
 
+:::note
+The console logs print the internal representation of Result; that is to say a bog-standard array of size 2, with index 0 containing the status (`Ok` or `Err`), and index 1 containing the actual value (`T` or `E` respectively).
+
+You should generally just use the helper functions listed below, but if you want to, you can index into this directly, albeit without any safety checking.
+:::
+
 Notice that despite `half` containing an `Ok` result and `double` containing an `Err` result, they still have the same type.
+
+
+### `match()`: Verbose but exhaustive
 
 To get our value out of the `Result`, we can use `match()`:
 
 ```ts
-const half = percent(1, 2); //=> Result<string, PercentErrors>
-const half_str = match(half, {
-    Ok: (x) => `${x}%`,
-    Err: () => "Something went wrong."
-})
-console.log(half_str) // "50%"
+const half = percent(1, 2);
+match(half, {
+    Ok: (x) => console.log("ok:", x),
+    Err: (x) => console.log("error:", x)
+}); // ok: 50%
+
+const double = percent(2, 1);
+match(double, {
+    Ok: (x) => console.log("ok:", x),
+    Err: (x) => console.log("error:", x)
+}); // error: [ "TotalLessThanN", 200 ]
 ```
 
-### `unwrap()`: Useful in a pinch, but please don't use it in prod
+When our `Err` is an enum, like it is here, we can nest match statements to handle the full chain: 
+
+```ts
+const double = percent(2, 1);
+match(double, {
+    Ok: (x) => console.log("ok:", x),
+    Err: (err) => match(err, {
+        DivByZero: (x) => console.log("Divided by zero!", `${x}%`),
+        TotalLessThanN: (x) => console.log("Total is less than points earned!", `${x}%`),
+        NegativeResult: (x) => console.log("Negative percentage!", `${x}%`),
+    })
+}); // Total is less than points earned! 200%
+```
+
+### `unwrap()`: Terse, but explosive
+
+:::caution
+Unwrap is useful in a pinch, but please avoid using it in prod! Consider the `or()` method below if you want something that's briefer than `match()`, but still safe.
+:::
 
 A simpler, but unsafe way of extracting the value is to use the `unwrap()` function:
 
 ```ts
-
+const half = percent(1, 2);
+console.log(half.unwrap()); // 50%
 ```
 
 Really simple, right? Why deal with all the extra code and overhead of that matching nonsense when you can just unwrap your value like a present?
@@ -79,9 +124,29 @@ Really simple, right? Why deal with all the extra code and overhead of that matc
 Well, the problem is that this present might throw a grenade at you when you open it:
 
 ```ts
-
+const double = percent(2, 1);
+console.log(double.unwrap());
 ```
 
-You should only use `unwrap()` if you're absolutely, positively sure that the function will not return an `Err`, and it's best saved for prototyping, after which you can replace them with `match()` statements to make them safer.
+```bash
+TypeError: Err(): TotalLessThanN,200
+      at /home/teo/crabrave/src/unwrap.ts:20:7
+      at /home/teo/crabrave/examples/percent.ts:24:12
+```
 
-Avoid `unwrap()` in production.
+You should only use `unwrap()` if you're absolutely, positively sure that the function will not return an `Err`, and it's best saved for prototyping, after which you can replace them with `match()` and `or()` statements to make them safer.
+
+**Avoid `unwrap()` in production.**
+
+### `or()`: A solid middle ground
+
+`or()` is the exact same as `unwrap()`, except that instead of crashing your program when it encounters an `Err` it'll return the fallback value you pass into it:
+
+```ts
+const half = percent(1, 2);
+console.log(half.or("0%")); // 50%
+
+
+const double = percent(2, 1);
+console.log(double.or("0%")); // 0%
+```

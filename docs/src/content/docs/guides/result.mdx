@@ -3,6 +3,8 @@ title: Results gently pass errors
 description: going to add one later
 ---
 
+Why throw when you can gently hand something over?
+
 ## Traditional JS/TS error handling
 
 Let's say we want to make a function that calculates a percentage based on `n`, which is the number of points earnes, and `total`, which is the maximum number of points, and then formats that percentage into a string for display:
@@ -158,7 +160,7 @@ ok: 50%
 error: [ "TotalLessThanN", 200 ]
 ```
 
-Note that the error case is an array of length 2. This is because this is how enums, including the `PercentError` enum we used as the error type, are represented internally. We can nest another `match()` to properly handle all the `PercentError` cases.
+Note that the error case is an array of length 2. This is actually an instance of our `PercentError` enum specified as the error type, and we can nest another `match()` to properly handle all the `PercentError` cases.
 
 ```ts
 const double = percent(2, 1);
@@ -172,11 +174,11 @@ match(double, {
 });
 ```
 
-This match statement logs `Total is less than points earned! 200%` to the console.
+This match statement now logs `Total is less than points earned! 200%` to the console.
 
 ### Or don't!
 
-Of course, while I don't reccomend it, there is nothing physically stopping you from tossing and throwing your deliveries.
+Of course, while I don't reccomend it, there is nothing physically stopping you from tossing and throwing your `Result`s.
 
 We can update our code like so:
 
