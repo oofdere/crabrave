@@ -7,9 +7,9 @@ import { Result } from "./result";
 declare global {
 	interface Array<T> {
 		// biome-ignore lint/suspicious/noExplicitAny: function doesn't use E
-		unwrap(this: Enum<Option<T>> | Enum<Result<T, any>>): T,
+		unwrap<U>(this: Enum<Option<U>> | Enum<Result<U, any>>): U,
 		// biome-ignore lint/suspicious/noExplicitAny: fucntion doesn't use E
-		or<E>(this: Enum<Option<T>> | Enum<Result<T, any>>, fallback: E): T,
+		or<U, E>(this: Enum<Option<U>> | Enum<Result<U, any>>, fallback: E): U | E,
 	}
 }
 
