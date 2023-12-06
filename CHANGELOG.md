@@ -1,5 +1,11 @@
 # @oofdere/crabrave
 
+## 0.2.2
+
+### Patch Changes
+
+- 30d3de4: fix generics in `unwrap()` and `or()` functions
+
 ## 0.2.1
 
 ### Patch Changes

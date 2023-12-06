@@ -2,7 +2,7 @@
   "name": "@oofdere/crabrave",
   "module": "index.ts",
   "type": "module",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "license": "MIT",
   "scripts": {
     "size": "bun build index.ts --minify | wc -m"
