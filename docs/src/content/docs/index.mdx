@@ -17,7 +17,7 @@ hero:
       icon: github
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
 
 :::caution
 The library and docs are both experimental and heavily under construction! Anything and everything might change at a moment's notice!
@@ -31,14 +31,17 @@ The library and docs are both experimental and heavily under construction! Anyth
 		<a href="https://pkg-size.dev/@oofdere/crabrave?no-peers"><img src="https://pkg-size.dev/badge/bundle/447" title="Bundle size for @oofdere/crabrave" style="display: inline-block;" /></a>
 		You won't even notice it's there.
 	</Card>
-	<Card title="Packed Enums hold data" icon="list-format">
+	<Card title="Enums hold data" icon="list-format">
 		Toss an `Enum<Coins>` entry into a `match()` and see the right code magically run!
+		<LinkCard title="Learn more about Packed Enums" href="/guides/enums" />
 	</Card>
 	<Card title="Results pass errors" icon="random">
 		Gently return errors instead of rudely throwing them using `Result<T, E>`
+		<LinkCard title="Learn more about Results" href="/guides/result" />
 	</Card>
 	<Card title="Options are like gifts" icon="star">
-		`Option<T>` is a box that can contain something (`T`) or `None`. Unwrap one today to see what's inside!
+		`Option<T>` is a box that can contain something (`T`) or nothing (`None`). Unwrap one today to see what's inside!
+		<LinkCard title="Learn more about Options" href="/guides/option" />
 	</Card>
 	
 </CardGrid>
