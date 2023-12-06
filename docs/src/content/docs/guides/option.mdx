@@ -2,4 +2,162 @@
 title: Options are boxes that might be full
 ---
 
-Let's say you're trying to build out a lottery system. You need some way to represent thata user might or might not have won a prize.
+Let's say you've decided to start a lottery. It's a very simple lottery:
+
+ - You buy a ticket for $1 that tells you if you win or lose.
+ - If you lose, your $1 goes into the prize pool.
+ - If you win, you win the entirety of the prize pool.
+
+Let's begin coding. First, we set some variables that contain the initial value of the prize pool, the chance of winning, and the amount of games to be simulated.
+
+```ts
+let pool = 0;
+const chance = 0.1;
+const games = 10000;
+```
+
+Then we make a function that updates the prize pool and dispenses a ticket, which is a number if you won, or `undefined` if you lost.
+
+```ts
+function play() { //=> number | undefined
+    const win = Math.random() <= chance;
+
+    // add to the pool
+    pool += 1;
+
+    if (win) {
+        // take the winnings from the pool
+        const winnings = pool;
+        pool = 0;
+
+        // give to the winner
+        return winnings
+    } else {
+        // return undefined to signify the loss
+        return undefined
+    }
+}
+```
+
+And then let's simulate some games and print some stats:
+
+```ts
+let losses = 0;
+let wins = 0;
+let winnings = 0;
+
+for (const i of [...Array(games).keys()]) {
+    const won = play();
+
+    if (won) {
+        wins += 1;
+        winnings += 1;
+    } else {
+        losses += 1;
+    }
+}
+
+console.log(`${wins} wins, ${losses} losses`)
+console.log(`Net balance: $${winnings - losses}`)
+```
+
+As we'd expect from a lottery with a 10% chance of winnning, we're not doing so hot after spending $10000 on tickets:
+
+```bash
+[teo@koolaide crabrave]$ bun run examples/lotto.ts 
+1035 wins, 8965 losses
+Net balance: $-7930
+[teo@koolaide crabrave]$ bun run examples/lotto.ts 
+981 wins, 9019 losses
+Net balance: $-8038
+[teo@koolaide crabrave]$ bun run examples/lotto.ts 
+991 wins, 9009 losses
+Net balance: $-8018
+[teo@koolaide crabrave]$ bun run examples/lotto.ts 
+1004 wins, 8996 losses
+Net balance: $-7992
+[teo@koolaide crabrave]$ 
+```
+
+Thankfully, the lottery has a program to help people who got  in debt because of it. They hire us to make their code more "succinct and readable".
+
+You have no idea what that means, but they also suggest that you use `Option<T>` from the library `@oofdere/crabrave`. You oblige, because you have no idea what any of this has to do with succulents and maybe this will give you a clue.
+
+First, you import the Option utilities:
+
+```ts
+import { Enum, None, Option, Some } from "@oofdere/crabrave";
+```
+
+Then, you update the `play()` function to return an `Option<T>` enum:
+
+```diff lang="ts"
+-function play() {
++function play(): Enum<Option<number>> {
+    const win = Math.random() <= chance;
+
+    pool += 1;
+
+    if (win) {
+        const winnings = pool;
+        pool = 0;
+
+-        return winnings
++        return Some(winnings)
+    } else {
+-        return undefined
++        return None()
+    }
+}
+
+```
+
+Now we can run simulations like so:
+
+```ts
+let balance = 0;
+
+for (const i of [...Array(games).keys()]) {
+    balance += match(play(), {
+        Some: (x) => x, //=>
+        None: (x) => -1 //=>
+    })
+}
+
+console.log(`Net balance: $${balance}`);
+```
+
+Or even more succinctly:
+
+```ts
+let balance = 0
+
+for (const i of [...Array(games).keys()]) {
+    balance += play().or(-1);
+}
+
+console.log(`Net balance: $${balance}`);
+```
+
+## Options force you to handle the lack of a value
+
+On the surface `Option<T>` just looks like a less efficient/more complicated version of `T | undefined`. The big difference is that with `Option<T>`, you *must* always handle the `None` case, wheras with undefined, you might not even know to expect it.
+
+```ts
+// types with T | undefined
+30 // number | undefined
+undefined // number | undefined
+
+// values with Option<T>
+[ "Some", 30 ] // Some(T)
+[ "None" ] // None
+
+// types after Option<T>.or(-1)
+30 // number
+-1 // number
+
+// types after Option<T>.unwrap()
+30 // number
+// losing will throw a TypeError when unwrapping.
+```
+
