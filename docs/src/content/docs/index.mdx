@@ -23,9 +23,13 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
 The library and docs are both experimental and heavily under construction! Anything and everything might change at a moment's notice!
 :::
 
-<CardGrid stagger>
+<CardGrid>
 	<Card title="Code without fear" icon="pencil">
 		TypeScript will yell at you if something breaks and point to what needs changing!
+	</Card>
+	<Card title="Light as a feather" icon="feather">
+		<a href="https://pkg-size.dev/@oofdere/crabrave?no-peers"><img src="https://pkg-size.dev/badge/bundle/447" title="Bundle size for @oofdere/crabrave" style="display: inline-block;" /></a>
+		You won't even notice it's there.
 	</Card>
 	<Card title="Packed Enums hold data" icon="list-format">
 		Toss an `Enum<Coins>` entry into a `match()` and see the right code magically run!
@@ -33,7 +37,7 @@ The library and docs are both experimental and heavily under construction! Anyth
 	<Card title="Results pass errors" icon="random">
 		Gently return errors instead of rudely throwing them using `Result<T, E>`
 	</Card>
-	<Card title="Options are like a gift" icon="star">
+	<Card title="Options are like gifts" icon="star">
 		`Option<T>` is a box that can contain something (`T`) or `None`. Unwrap one today to see what's inside!
 	</Card>
 	
