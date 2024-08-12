@@ -9,26 +9,24 @@ export type EnumChecked<E> = { [K in keyof E]: [K, E[K]] }[keyof E];
 type Arms<E> = {
 	// biome-ignore lint/suspicious/noExplicitAny: type checking is handled externally
 	[K in keyof E]-?: (x: E[K]) => any;
-};
+} | PartialArms<E>
 
-type PartialArms<E, T> = {
-	[K in keyof E]?: (x: E[K]) => T;
+type PartialArms<E> = {
+	// biome-ignore lint/suspicious/noExplicitAny: type checking is handled externally
+	[L in keyof E]?: (x: E[L]) => any;
+} & {
+	// biome-ignore lint/suspicious/noExplicitAny: type checking is handled externally
+	_: (x: EnumChecked<E>[1]) => any
 };
 
 // this is the recommended way to create enum instances so you have strong type checking
-export const pack = <E>(...entry: EnumChecked<E>): Enum<E> => entry as Enum<E>;
+export const pack = <E>(...entry: EnumChecked<E>) => entry satisfies EnumChecked<E>;
 
 export const match = <E, Fn extends Arms<E>>(
 	pattern: Enum<E>,
 	arms: Fn,
+) =>
 	// biome-ignore lint/suspicious/noExplicitAny: required
-): ReturnType<typeof arms[keyof typeof arms]> =>
-	arms[pattern[0]](pattern[1] as any);
-
-export const matchPartial = <E, T>(
-	pattern: Enum<E>,
-	arms: PartialArms<E, T>,
-	// biome-ignore lint/suspicious/noExplicitAny: laziness, this can get typed with a union of the arm types
-	fallback: (x: any) => T,
-	// biome-ignore lint/suspicious/noExplicitAny: required
-): T => ((arms[pattern[0]] as any) || fallback)(pattern[1] as any);
+	// biome-ignore lint/style/noNonNullAssertion: will never be null when short-circuited
+	((arms[pattern[0]] as any) || arms._!)(pattern[1] as any);;
+// typescript REALLY hates this and I can't blame it

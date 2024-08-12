@@ -1,4 +1,4 @@
-import { Enum } from "./enum";
+import type { Enum } from "./enum";
 import "./unwrap";
 
 export type Option<T> = {

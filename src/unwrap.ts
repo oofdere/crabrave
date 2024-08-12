@@ -1,8 +1,8 @@
 // this adds the unwrap function to array prototypes
 
-import { Enum } from "./enum";
-import { Option } from "./option";
-import { Result } from "./result";
+import type { Enum } from "./enum";
+import type { Option } from "./option";
+import type { Result } from "./result";
 
 declare global {
 	interface Array<T> {
