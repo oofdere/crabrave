@@ -1,12 +1,12 @@
 // enum objects are simply a tuple containing a key and a value which are derived from the enum template E
-export type Enum<E> = [keyof E, E[keyof E]];
+export type Enum<E> = { [K in keyof E]: [K, E[K]] }[keyof E];
 
 // same as above, but enforces that the value is a valid type for the key, used in the pack function
 export type EnumChecked<E> = { [K in keyof E]: [K, E[K]] }[keyof E];
 
 // type to create the matching arms used in the match function
 // "-?" removes any optional parameters, making all cases required
-type Arms<E> = {
+export type Arms<E> = {
 	// biome-ignore lint/suspicious/noExplicitAny: type checking is handled externally
 	[K in keyof E]-?: (x: E[K]) => any;
 } | PartialArms<E>

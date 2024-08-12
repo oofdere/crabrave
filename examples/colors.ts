@@ -1,4 +1,4 @@
-import { Enum, match, pack } from ".."
+import { type Enum, match, pack } from ".."
 
 type Colors = {
     Red: number;
@@ -7,11 +7,16 @@ type Colors = {
     Rgb: [number, number, number];
 };
 
-const red = pack<Colors>("Red", 128) //=> const red: Enum<Colors>
+const red = pack("Red", 128) //=> const red: Enum<Colors>
 const green = pack<Colors>("Green", 128) //=> const green: Enum<Colors>
 const blue = pack<Colors>("Blue", 128) //=> const blue: Enum<Colors>
 
 function toRGB(color: Enum<Colors>) { // returns number[]
+    match(color, {
+        Rgb: (x) => x, //=> (property) Rgb: (x: [number, number, number]) => [number, number, number]
+        _: (x) => x //=> 
+    });
+
     return match(color, {
         Red: (x) => [x, 0, 0], //=> (property) Red: (x: number) => number[]
         Green: (x) => [0, x, 0], //=> (property) Green: (x: number) => number[]
