@@ -25,8 +25,8 @@ export const pack = <E>(...entry: EnumChecked<E>) => entry satisfies EnumChecked
 export const match = <E, Fn extends Arms<E>>(
 	pattern: Enum<E>,
 	arms: Fn,
-) =>
-	// biome-ignore lint/suspicious/noExplicitAny: required
-	// biome-ignore lint/style/noNonNullAssertion: will never be null when short-circuited
-	((arms[pattern[0]] as any) || arms._!)(pattern[1] as any);;
-// typescript REALLY hates this and I can't blame it
+): ReturnType<typeof arms[keyof typeof arms]> =>
+	// ^ typescript ABSOLUTELY FREAKS OUT about this BUT it does work so ¯\_(ツ)_/¯
+	// biome-ignore lint/suspicious/noExplicitAny: return type is handled externally
+	((arms[pattern[0]] as any) || (arms as any)._)(pattern[1] as any);; // <- dunno why there are two semicolons here
+// typescript REALLY hates this (hence all the `any`) and I really can't blame it
