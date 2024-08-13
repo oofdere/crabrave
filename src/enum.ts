@@ -33,30 +33,3 @@ export function match<E, Fn extends Arms<E>>(
 	return ((arms[pattern[0]] as any) || (arms as any)._)(pattern[1] as any) as ReturnType<typeof arms[keyof typeof arms]>;
 	// typescript REALLY hates this (hence all the `any`) and I really can't blame it
 }
-
-type Color = {
-	Red: number;
-	Blue: number;
-	Green: number;
-	Rgb: [number, number, number];
-};
-
-const red = pack<Color>("Red", 128) //=> const red: Enum<Colors>
-const green = pack<Color>("Green", 128) //=> const green: Enum<Colors>
-const blue = pack<Color>("Blue", 128) //=> const blue: Enum<Colors>
-
-function toRGB(color: Color) { // returns number[]
-	const a = match(color, {
-		Rgb: (x) => x, //=> 
-		_: (x) => x //=> 
-	}); //=>
-
-	const b = match(color, {
-		Red: (x) => [x, 0, 0], //=> 
-		Green: (x) => [0, x, 0], //=> 
-		Blue: (x) => [0, 0, x], //=> 
-		Rgb: (x) => x //=> 
-	});
-}
-
-console.log(toRGB(blue)); // [ 0, 0, 128 ]

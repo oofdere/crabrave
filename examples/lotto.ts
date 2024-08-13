@@ -1,10 +1,10 @@
-import { Enum, None, Option, Some, match } from "..";
+import { type Enum, None, type Option, Some, match } from "..";
 
 let pool = 0;
 const chance = 0.1;
 const games = 10000;
 
-function play(): Enum<Option<number>> {
+function play(): Option<number> {
     const win = Math.random() <= chance;
     pool += 1;
 
@@ -13,9 +13,9 @@ function play(): Enum<Option<number>> {
         pool = 0;
 
         return Some(winnings)
-    } else {
-        return None()
     }
+
+    return None()
 }
 
 let balance = 0;

@@ -1,15 +1,13 @@
 // this adds the unwrap function to array prototypes
-
-import type { Enum } from "./enum";
 import type { Option } from "./option";
 import type { Result } from "./result";
 
 declare global {
-	interface Array<T> {
+	interface Object { // we lie about the enum array being an object here for autocomplete
 		// biome-ignore lint/suspicious/noExplicitAny: function doesn't use E
-		unwrap<U>(this: Enum<Option<U>> | Enum<Result<U, any>>): U,
+		unwrap<U>(this: Option<U> | Result<U, any>): U,
 		// biome-ignore lint/suspicious/noExplicitAny: fucntion doesn't use E
-		or<U, E>(this: Enum<Option<U>> | Enum<Result<U, any>>, fallback: E): U | E,
+		or<U, E>(this: Option<U> | Result<U, any>, fallback: E): U | E,
 	}
 }
 
