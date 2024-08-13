@@ -19,10 +19,12 @@ type PartialArms<E> = {
 	_: (x: EnumChecked<E>[1]) => any
 };
 
-// this is the recommended way to create enum instances so you have strong type checking
+// this is a generic way to create enum instances, but the Enum() factory function is preferred
 export function pack<E>(...entry: Enum<E>) {
 	return entry as E // this is disgusting and we are completely just lying to tsc and the user and it works
 }
+
+export const Enum = <E>() => (...entry: Enum<E>) => entry as unknown as E
 
 export function match<E, Fn extends Arms<E>>(
 	pattern: E,
