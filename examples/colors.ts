@@ -11,13 +11,13 @@ const red = pack("Red", 128) //=> const red: Enum<Colors>
 const green = pack<Colors>("Green", 128) //=> const green: Enum<Colors>
 const blue = pack<Colors>("Blue", 128) //=> const blue: Enum<Colors>
 
-function toRGB(color: Enum<Colors>) { // returns number[]
-    match(color, {
-        Rgb: (x) => x, //=> (property) Rgb: (x: [number, number, number]) => [number, number, number]
+function toRGB(color: Colors) { // returns number[]
+    const a = match(color, {
+        Rgb: (x) => x, //=> 
         _: (x) => x //=> 
-    });
+    }); //=>
 
-    return match(color, {
+    const b = match(color, {
         Red: (x) => [x, 0, 0], //=> (property) Red: (x: number) => number[]
         Green: (x) => [0, x, 0], //=> (property) Green: (x: number) => number[]
         Blue: (x) => [0, 0, x], //=> (property) Blue: (x: number) => number[]
