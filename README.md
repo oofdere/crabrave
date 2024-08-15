@@ -42,8 +42,9 @@ bun test
    - sorry, fluent APIs are not tree-shakable, and I can't add them until they are otherwise the bundle size will explode :( (ideally there would just be a macro system and then this whole thing becomes a zero-cost abstraction instead of an almost-zero-cost one)
 3. but the bundle size is already so small! your competiton is an order of magnitude bigger!
    - I guess.
-4. why are there errors all over the code?
-   - because we're lying to typescript and it's not a very big fan of our dishonesty.
+4. ~~why are there errors all over the code?~~
+   - ~~because we're lying to typescript and it's not a very big fan of our dishonesty.~~
+   - I managed to shut typescript up somehow
 5. what is the performance impact?
    - not too bad probably since it's just one extra function call. if macros were a thing you could make it zero-cost, I'll try to experiment with that in the future probably with bun or vite.
 6. ok but like, benchmark it.
