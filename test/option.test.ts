@@ -1,4 +1,4 @@
-import { expect, test } from "bun:test";
+import { assert, expect, test } from "vitest";
 
 import { Some, None, match } from "../index";
 
@@ -39,9 +39,8 @@ test("match_some", () => {
 	const option = Some(0);
 
 	match(option, {
-		Some: (x) => expect(x).toBe(0), //=>
+		Some: (x) => expect(x).toBe(0),
 		None: () => {
-			//=>
 			throw 1;
 		},
 	});
@@ -49,9 +48,8 @@ test("match_some", () => {
 
 test("match_none", () => {
 	const option = None<number>();
-
 	match(option, {
-		Some: (x) => expect().fail(), // =>
-		None: () => expect().pass(), //=>
+		Some: (x) => assert.fail(), // =>
+		None: () => assert.isTrue(true), //=>
 	});
 });

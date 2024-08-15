@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expectTypeOf, expect, test, assert } from "vitest";
 import { type Enum, match, pack, type EnumChecked } from "..";
 
 type Tests = {
@@ -10,8 +10,7 @@ type Tests = {
 	String: string;
 	Symbol: symbol;
 	FixedObject: { key: "value" };
-	// biome-ignore lint/complexity/noBannedTypes: for testing
-	Object: Object;
+	Object: object;
 	FixedArray: [1, 2, 3];
 	Array: Array<number>;
 };
@@ -43,7 +42,7 @@ describe("packing", () => {
 
 // matching
 describe("matching", () => {
-	const packs: Enum<Tests>[] = [];
+	const packs: Tests[] = [];
 	for (const k in tests) {
 		test(k, () => packs.push(pack<Tests>(k, tests[k])));
 	}
@@ -51,19 +50,19 @@ describe("matching", () => {
 	for (const p of packs) {
 		test(p[0], () => {
 			match(p, {
-				Null: (e) => expect(e).toBeNull(), //=>
-				Undefined: (e) => expect(e).toBeUndefined(), //=>
-				Boolean: (e) => expect(e).toBeTrue(), //=>
-				Number: (e) => expect(e).toBe(0), //=>
-				BigInt: (e) => expect(e).toBeTypeOf("bigint"), //=>
-				String: (e) => expect(e).toBe("string"), //=>
-				Symbol: (e) => expect(e).toBe(tests.Symbol), //=>
-				FixedObject: (e) => expect(e).toBe({ key: "value" }), //=>
-				Object: (e) => expect(e).toMatchObject({ key: "value" }), //=>
-				FixedArray: (e) => expect(e).toBeArrayOfSize(3), //=>
-				Array: (e) => expect(e).toBeArray(), //=>
+				Null: (e) => expectTypeOf(e).toBeNull(),
+				Undefined: (e) => expectTypeOf(e).toBeUndefined(),
+				Boolean: (e) => expect(e).toBeTruthy(),
+				Number: (e) => expect(e).toBe(0),
+				BigInt: (e) => expect(e).toBeTypeOf("bigint"),
+				String: (e) => expectTypeOf(e).toBeString(),
+				Symbol: (e) => expect(e).toBe(tests.Symbol),
+				FixedObject: (e) => expect(e).toMatchObject({ key: "value" }),
+				Object: (e) => expect(e).toMatchObject({ key: "value" }),
+				FixedArray: (e) => expectTypeOf(e).toBeArray(),
+				Array: (e) => expectTypeOf(e).toBeArray(),
 			});
-			expect().fail();
+			assert.fail();
 		});
 	}
 
@@ -74,8 +73,8 @@ describe("matching", () => {
 
 		for (const p of packs) {
 			test(p[0], () => {
-				match(p, { _: () => expect().pass() });
-				expect().fail();
+				match(p, { _: () => expectTypeOf().pass() });
+				expectTypeOf().fail();
 			});
 		}
 	});

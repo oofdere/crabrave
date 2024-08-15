@@ -1,4 +1,4 @@
-import { expect, test } from "bun:test";
+import { assert, expect, test } from "vitest";
 
 import { Ok, Err, match } from "../index";
 
@@ -49,7 +49,7 @@ test("match_ok", () => {
 test("match_err", () => {
 	const result = Err<number, number>(1);
 	match(result, {
-		Ok: (x) => expect().fail(), //=>
+		Ok: (x) => assert.fail(), //=>
 		Err: (x) => expect(x).toBe(1), //=>
 	});
 });

@@ -5,12 +5,15 @@
 	"version": "0.2.2",
 	"license": "MIT",
 	"scripts": {
-		"size": "bun build index.ts --minify | wc -m"
+		"size": "bun build index.ts --minify | wc -m",
+		"test": "vitest"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "latest",
 		"@changesets/cli": "^2.27.7",
-		"@types/bun": "latest"
+		"@types/bun": "latest",
+		"@vitest/ui": "^2.0.5",
+		"vitest": "^2.0.5"
 	},
 	"peerDependencies": {
 		"typescript": "^5.5.4"
