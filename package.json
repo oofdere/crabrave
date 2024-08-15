@@ -1,18 +1,18 @@
 {
-  "name": "@oofdere/crabrave",
-  "module": "index.ts",
-  "type": "module",
-  "version": "0.2.2",
-  "license": "MIT",
-  "scripts": {
-    "size": "bun build index.ts --minify | wc -m"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "latest",
-    "@changesets/cli": "^2.27.7",
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5.5.4"
-  }
+	"name": "@oofdere/crabrave",
+	"module": "index.ts",
+	"type": "module",
+	"version": "0.2.2",
+	"license": "MIT",
+	"scripts": {
+		"size": "bun build index.ts --minify | wc -m"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "latest",
+		"@changesets/cli": "^2.27.7",
+		"@types/bun": "latest"
+	},
+	"peerDependencies": {
+		"typescript": "^5.5.4"
+	}
 }

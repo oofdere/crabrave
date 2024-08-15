@@ -33,7 +33,6 @@ test("unwrapOr_some", () => {
 test("unwrapOr_none", () => {
 	const option = None<number>();
 	expect(option.or(1)).toBe(1);
-
 });
 
 test("match_some", () => {
@@ -41,9 +40,10 @@ test("match_some", () => {
 
 	match(option, {
 		Some: (x) => expect(x).toBe(0), //=>
-		None: (x) => { //=>
-			throw 1
-		}
+		None: () => {
+			//=>
+			throw 1;
+		},
 	});
 });
 
@@ -52,6 +52,6 @@ test("match_none", () => {
 
 	match(option, {
 		Some: (x) => expect().fail(), // =>
-		None: () => expect().pass() //=>
+		None: () => expect().pass(), //=>
 	});
 });

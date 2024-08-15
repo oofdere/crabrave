@@ -3,15 +3,16 @@ import type { Option } from "./option";
 import type { Result } from "./result";
 
 declare global {
-	interface Object { // we lie about the enum array being an object here for autocomplete
+	interface Object {
+		// we lie about the enum array being an object here for autocomplete
 		// biome-ignore lint/suspicious/noExplicitAny: function doesn't use E
-		unwrap<U>(this: Option<U> | Result<U, any>): U,
+		unwrap<U>(this: Option<U> | Result<U, any>): U;
 		// biome-ignore lint/suspicious/noExplicitAny: fucntion doesn't use E
-		or<U, E>(this: Option<U> | Result<U, any>, fallback: E): U | E,
+		or<U, E>(this: Option<U> | Result<U, any>, fallback: E): U | E;
 	}
 }
 
-const a = Array.prototype
+const a = Array.prototype;
 
 a.unwrap = function () {
 	if (this[0] === "Some" || this[0] === "Ok") {

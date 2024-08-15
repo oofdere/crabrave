@@ -42,15 +42,14 @@ test("match_ok", () => {
 	const result = Ok<number, number>(0);
 	match(result, {
 		Ok: (x) => expect(x).toBe(0), //=>
-		Err: (x) => expect().fail() //=>
-	})
+		Err: (x) => expect().fail(), //=>
+	});
 });
 
 test("match_err", () => {
 	const result = Err<number, number>(1);
 	match(result, {
 		Ok: (x) => expect().fail(), //=>
-		Err: (x) => expect(x).toBe(1) //=>
-	})
+		Err: (x) => expect(x).toBe(1), //=>
+	});
 });
-

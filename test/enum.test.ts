@@ -63,7 +63,7 @@ describe("matching", () => {
 				FixedArray: (e) => expect(e).toBeArrayOfSize(3), //=>
 				Array: (e) => expect(e).toBeArray(), //=>
 			});
-			expect().fail()
+			expect().fail();
 		});
 	}
 
@@ -75,8 +75,8 @@ describe("matching", () => {
 		for (const p of packs) {
 			test(p[0], () => {
 				match(p, { _: () => expect().pass() });
-				expect().fail()
+				expect().fail();
 			});
 		}
-	})
+	});
 });
