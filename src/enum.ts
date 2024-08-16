@@ -5,22 +5,24 @@ export type Enum<E> = { [K in keyof E]: [K, E[K]] }[keyof E];
 // "-?" removes any optional parameters, making all cases required
 export type Arms<E> =
 	| {
-		[K in keyof E]-?: (x: E[K]) => unknown;
-	}
+			[K in keyof E]-?: (x: E[K]) => unknown;
+	  }
 	| ({
-		[L in keyof E]?: (x: E[L]) => unknown;
-	} & {
-		_: (x: Enum<E>[1]) => unknown;
-	});
+			[L in keyof E]?: (x: E[L]) => unknown;
+	  } & {
+			_: (x: Enum<E>[1]) => unknown;
+	  });
 
 // this is a generic way to create enum instances, but the Enum() factory function is preferred
-export const pack = <E>(...entry: Enum<E>) => entry as E;
+export const pack = <E>(...e: Enum<E>) => e as E;
 
 export const Enum =
 	<E>() =>
-		(...entry: Enum<E>) =>
-			entry as unknown as E;
+	(...e: Enum<E>) =>
+		e as unknown as E;
 
 export const match = <E, Fn extends Arms<E>>(pattern: E, arms: Fn) =>
 	// biome-ignore lint/suspicious/noExplicitAny: return type is handled externally
-	(((arms as any)[(pattern as any[])[0]] as any) || (arms as any)._)((pattern as any)[1] as unknown,) as ReturnType<Exclude<(typeof arms)[keyof typeof arms], undefined>>;
+	(((arms as any)[(pattern as any[])[0]] as any) || (arms as any)._)(
+		(pattern as any)[1] as unknown,
+	) as ReturnType<Exclude<(typeof arms)[keyof typeof arms], undefined>>;

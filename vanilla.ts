@@ -1,7 +1,7 @@
 enum ColorEnum {
-	Red,
-	Green,
-	Blue,
+	Red = 0,
+	Green = 1,
+	Blue = 2,
 }
 
 const red = ColorEnum.Red;
