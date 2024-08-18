@@ -8,17 +8,17 @@ type Colors = {
 };
 const Colors = Enum<Colors>();
 
-const red = Colors("Red", 128); //=> const red: Enum<Colors>
-const green = Colors("Green", 128); //=> const green: Enum<Colors>
-const blue = Colors("Blue", 128); //=> const blue: Enum<Colors>
+const red = Colors("Red", 128);
+const green = Colors("Green", 128);
+const blue = Colors("Blue", 128);
 
-function toRGB(color: Colors) {
+function toRGB(color: Colors): number[] {
 	// returns number[]
 	return match(color, {
-		Red: (x) => [x, 0, 0], //=> (property) Red: (x: number) => number[]
-		Green: (x) => [0, x, 0], //=> (property) Green: (x: number) => number[]
-		Blue: (x) => [0, 0, x], //=> (property) Blue: (x: number) => number[]
-		Rgb: (x) => x, //=> (property) Rgb: (x: [number, number, number]) => [number, number, number]
+		Red: (x) => [x, 0, 0],
+		Green: (x) => [0, x, 0],
+		Blue: (x) => [0, 0, x],
+		Rgb: (x) => x,
 	});
 }
 
