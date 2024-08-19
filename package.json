@@ -1,21 +1,40 @@
 {
-	"name": "@oofdere/crabrave",
-	"module": "index.ts",
-	"type": "module",
-	"version": "0.2.2",
-	"license": "MIT",
-	"scripts": {
-		"size": "bun build index.ts --minify | wc -m",
-		"test": "vitest"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "latest",
-		"@changesets/cli": "^2.27.7",
-		"@types/bun": "latest",
-		"@vitest/ui": "^2.0.5",
-		"vitest": "^2.0.5"
-	},
-	"peerDependencies": {
-		"typescript": "^5.5.4"
-	}
+  "name": "crabrave",
+  "keywords": [],
+  "module": "index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "size": "bun build index.ts --minify | wc -m",
+    "test": "vitest"
+  },
+  "files": [
+    "dist/*",
+    "README.md"
+  ],
+  "devDependencies": {
+    "@biomejs/biome": "latest",
+    "@changesets/cli": "^2.27.7",
+    "@types/bun": "latest",
+    "@vitest/ui": "^2.0.5",
+    "bun-plugin-dts": "^0.2.3",
+    "bun-plugin-isolated-decl": "^0.1.4",
+    "vitest": "^2.0.5"
+  },
+  "peerDependencies": {
+    "typescript": "^5.5.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oofdere/crabrave"
+  },
+  "author": {
+    "name": "Tibet Tornaci",
+    "email": "oofdere@hey.com",
+    "url": "https://oof.dere.systems"
+  },
+  "homepage": "https://github.com/oofdere/crabrave"
 }
