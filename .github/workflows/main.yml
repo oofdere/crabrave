@@ -12,3 +12,69 @@ jobs:
       - uses: oven-sh/setup-bun@v1
       - run: bun install
       - run: bun run test
+  lang:
+    name: crabrave-lang
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: lang
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      # The content mapper runs under Node with type stripping (22.18+).
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: bun install --frozen-lockfile
+      - name: grammar corpus, and grammar.json is up to date
+        run: bun run test:grammar && git diff --exit-code grammar/src
+      - run: bun run typecheck
+      - run: bun run test
+      - name: Helix queries are generated from the Zed ones
+        run: node editors/sync-queries.mjs && git diff --exit-code editors/helix
+  editors:
+    name: editor (${{ matrix.editor }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        editor: [vscode, neovim, helix, zed]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      # The content mapper runs under Node with type stripping (22.18+).
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: install crabrave-lang
+        run: bun install --frozen-lockfile
+        working-directory: lang
+      - name: VS Code
+        if: matrix.editor == 'vscode'
+        working-directory: lang/editors/vscode
+        run: |
+          bun install --frozen-lockfile
+          bun run typecheck
+          xvfb-run -a bun run test
+      - name: Neovim
+        if: matrix.editor == 'neovim'
+        working-directory: lang/editors/nvim
+        run: |
+          curl -sSfL https://github.com/neovim/neovim/releases/download/v0.11.4/nvim-linux-x86_64.tar.gz | tar xz -C "$RUNNER_TEMP"
+          git clone --depth 1 https://github.com/nvim-treesitter/nvim-treesitter "$RUNNER_TEMP/nvim-treesitter"
+          NVIM_TREESITTER="$RUNNER_TEMP/nvim-treesitter" "$RUNNER_TEMP/nvim-linux-x86_64/bin/nvim" --clean --headless -l test/run.lua
+      - name: Helix
+        if: matrix.editor == 'helix'
+        working-directory: lang/editors/helix
+        run: |
+          command -v tmux || sudo apt-get install -y tmux
+          curl -sSfL https://github.com/helix-editor/helix/releases/download/25.07.1/helix-25.07.1-x86_64-linux.tar.xz | tar xJ -C "$RUNNER_TEMP"
+          export HX="$RUNNER_TEMP/helix-25.07.1-x86_64-linux/hx"
+          export HELIX_RUNTIME="$RUNNER_TEMP/helix-25.07.1-x86_64-linux/runtime"
+          LOCAL_GRAMMAR=1 ./test.sh
+      - name: Zed
+        if: matrix.editor == 'zed'
+        working-directory: lang/editors/zed
+        run: |
+          rustup target add wasm32-wasip2
+          cargo build --release --target wasm32-wasip2

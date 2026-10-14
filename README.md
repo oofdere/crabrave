@@ -16,6 +16,22 @@ features:
 
 Check `/examples` and `/test` for code examples.
 
+## crabrave as a language (experimental)
+
+[`lang/`](lang) rebuilds crabrave as a language extension instead of a library: `.crab` files are TypeScript plus Rust-style `enum`, `match` and `?`, parsed with tree-sitter and type checked by TypeScript 7.1 through a content mapper.
+
+```ts
+enum Shape { Circle(number), Rect(w: number, h: number), Empty }
+
+const area = (shape: Shape) => match shape {
+	Circle(r) => Math.PI * r * r,
+	Rect(w, h) => w * h,
+	Empty => 0,
+};
+```
+
+See [`lang/README.md`](lang/README.md).
+
 To install development dependencies:
 
 ```bash

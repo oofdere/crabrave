@@ -1,0 +1,9 @@
+{
+	"name": "tree-sitter-crabrave",
+	"version": "0.0.0",
+	"private": true,
+	"type": "commonjs",
+	"description": "tree-sitter grammar for crabrave (TypeScript + Rust-style enums, match and ?)",
+	"license": "MIT",
+	"tree-sitter": [{ "scope": "source.crab", "file-types": ["crab"] }]
+}

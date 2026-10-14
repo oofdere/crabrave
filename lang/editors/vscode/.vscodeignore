@@ -1,0 +1,8 @@
+**
+!dist/extension.js
+!dist/extension.js.map
+!package.json
+!language-configuration.json
+!syntaxes/**
+!README.md
+!icon.png

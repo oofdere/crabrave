@@ -1,0 +1,71 @@
+/**
+ * Option and Result, written in crabrave itself.
+ *
+ * Values are plain tuples (`["Some", 1]`, `["None"]`, `["Ok", 1]`,
+ * `["Err", e]`), the same layout crabrave 1.x used.
+ */
+
+/** An optional value: `Some(value)` or `None`. */
+export enum Option<T> {
+	Some(T),
+	None,
+}
+
+/** The outcome of something that can fail: `Ok(value)` or `Err(error)`. */
+export enum Result<T, E> {
+	Ok(T),
+	Err(E),
+}
+
+export const { Some, None } = Option;
+export const { Ok, Err } = Result;
+
+/** The value inside `Some` or `Ok`. Throws on `None`, and rethrows an `Err`. */
+export function unwrap<T>(value: Option<T>): T;
+export function unwrap<T>(value: Result<T, unknown>): T;
+export function unwrap<T>(value: Option<T> | Result<T, unknown>): T {
+	return match value {
+		Some(inner) | Ok(inner) => inner,
+		None => { throw new TypeError("called unwrap() on None"); }
+		Err(error) => { throw error; }
+	};
+}
+
+/** The value inside `Some` or `Ok`, or `fallback`. */
+export function unwrapOr<T, U>(value: Option<T>, fallback: U): T | U;
+export function unwrapOr<T, U>(value: Result<T, unknown>, fallback: U): T | U;
+export function unwrapOr<T, U>(value: Option<T> | Result<T, unknown>, fallback: U): T | U {
+	return match value {
+		Some(inner) | Ok(inner) => inner,
+		_ => fallback,
+	};
+}
+
+/** Apply `f` to the value inside `Some` or `Ok`, passing `None` and `Err` through. */
+export function map<T, U>(value: Option<T>, f: (value: T) => U): Option<U>;
+export function map<T, U, E>(value: Result<T, E>, f: (value: T) => U): Result<U, E>;
+export function map<T, U, E>(
+	value: Option<T> | Result<T, E>,
+	f: (value: T) => U,
+): Option<U> | Result<U, E> {
+	return match value {
+		Some(inner) => Some(f(inner)),
+		Ok(inner) => Ok(f(inner)),
+		None => None,
+		Err(error) => Err(error),
+	};
+}
+
+/** `Some(value)` unless `value` is `null` or `undefined`. */
+export function from<T>(value: T | null | undefined): Option<T> {
+	return value == null ? None : Some(value);
+}
+
+/** Run `f`, catching anything it throws as an `Err`. */
+export function attempt<T>(f: () => T): Result<T, unknown> {
+	try {
+		return Ok(f());
+	} catch (error) {
+		return Err(error);
+	}
+}

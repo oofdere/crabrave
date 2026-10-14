@@ -1,0 +1,38 @@
+// Port of examples/percent.ts, plus `?`.
+import { Err, Ok, type Result, unwrapOr } from "@oofdere/crabrave-lang/prelude";
+
+export enum PercentError {
+	DivByZero,
+	TotalLessThanN(n: number, total: number),
+	Negative(number),
+}
+
+export function percent(n: number, total: number): Result<number, PercentError> {
+	if (total === 0) return Err(PercentError.DivByZero);
+	if (total < n) return Err(PercentError.TotalLessThanN(n, total));
+	const p = (n / total) * 100;
+	if (p < 0) return Err(PercentError.Negative(p));
+	return Ok(p);
+}
+
+/** Uses `?` to bail out with the first error. */
+export function spread(a: number, b: number, total: number): Result<string, PercentError> {
+	const low = percent(a, total)?;
+	const high = percent(b, total)?;
+	return Ok(`${low.toFixed(1)}% to ${high.toFixed(1)}%`);
+}
+
+export function explain(error: PercentError): string {
+	return match error {
+		DivByZero => "the total is zero",
+		TotalLessThanN(n, total) => `${n} is more than ${total}`,
+		Negative(p) if p < -100 => "way below zero",
+		Negative(_) => "below zero",
+	};
+}
+
+console.log(unwrapOr(spread(1, 2, 4), "no spread"));
+console.log(match spread(3, 2, 2) {
+	Ok(text) => text,
+	Err(error) => explain(error),
+});

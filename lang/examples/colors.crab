@@ -1,0 +1,21 @@
+// Port of examples/colors.ts. Compare with the library version:
+// `type Colors = {...}; const Colors = Enum<Colors>(); match(color, {...})`.
+
+export enum Color {
+	Red(number),
+	Green(number),
+	Blue(number),
+	Rgb(r: number, g: number, b: number),
+}
+
+export function toRGB(color: Color): [number, number, number] {
+	return match color {
+		Red(x) => [x, 0, 0],
+		Green(x) => [0, x, 0],
+		Blue(x) => [0, 0, x],
+		Rgb(r, g, b) => [r, g, b],
+	};
+}
+
+export const blue = Color.Blue(128);
+console.log(toRGB(blue)); // [ 0, 0, 128 ]

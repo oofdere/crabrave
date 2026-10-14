@@ -1,0 +1,41 @@
+import { Ok, type Result } from "@oofdere/crabrave-lang/prelude";
+
+enum Shape {
+	Circle(number),
+	Rect(w: number, h: number),
+	Empty,
+}
+
+export function area(s: Shape): number {
+	return match s {
+		Circle(r) => r * r,
+		Rect(w, h) => w * h,
+	};
+}
+
+export const label = (s: Shape) => match s {
+	Circle(_) => "circle",
+	Rectangle(_, _) => "rect",
+	_ => "other",
+};
+
+export function tooMany(s: Shape) {
+	match s {
+		Circle(r, extra) => console.log(r, extra),
+		_ => {}
+	}
+}
+
+export const wrongPayload = Shape.Rect(1, "2");
+export const wrongArity = Shape.Circle();
+
+function count(): Result<number, string> {
+	return Ok(1);
+}
+
+export function notAResult(): number {
+	const n = count()?;
+	return n;
+}
+
+enum Typo { A(Nmber) }

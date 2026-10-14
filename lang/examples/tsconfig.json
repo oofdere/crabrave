@@ -1,0 +1,16 @@
+{
+	"compilerOptions": {
+		"strict": true,
+		"noEmit": true,
+		"target": "esnext",
+		"module": "preserve",
+		"moduleResolution": "bundler",
+		"allowImportingTsExtensions": true,
+		"skipLibCheck": true,
+		"types": []
+	},
+	"contentMappers": [
+		{ "package": "@oofdere/crabrave-lang", "extensions": [".crab"] }
+	],
+	"include": ["**/*.crab", "**/*.ts"]
+}
