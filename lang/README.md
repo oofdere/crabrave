@@ -244,8 +244,10 @@ Imports of `.crab` modules need the extension: `import { Shape } from "./shapes.
 all run the project's own TypeScript 7.1 language server (`tsc --lsp
 --stdio`) with `initializationOptions: { runExternalCode: true }`, which gives
 `.crab` files diagnostics, hover, completion, signature help, go to
-definition, references, rename and semantic tokens. Each one is tested in the
-real editor (see [`editors/README.md`](editors/README.md)).
+definition, references, rename and semantic tokens. The VS Code, Neovim and
+Helix support is tested in the real editors; the Zed extension is built and its
+queries are compiled against the grammar (see
+[`editors/README.md`](editors/README.md)).
 
 | Editor | Install |
 |---|---|
