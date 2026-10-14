@@ -1,3 +1,2 @@
-# Regenerate with `bun run build:grammar`; grammar.json and node-types.json are kept.
-grammar/src/parser.c
-grammar/src/tree_sitter/
+# Editor checks and caches
+editors/vscode/.vscode-test/
