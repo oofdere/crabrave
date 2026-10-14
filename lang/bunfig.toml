@@ -1,0 +1,2 @@
+# Lets `bun run file.crab` and `.crab` imports work inside this package.
+preload = ["./src/register.ts"]

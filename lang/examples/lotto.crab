@@ -1,0 +1,29 @@
+// Port of examples/lotto.ts.
+import { None, type Option, Some, unwrapOr } from "@oofdere/crabrave-lang/prelude";
+
+let pool = 0;
+const chance = 0.1;
+const games = 10_000;
+
+export function play(): Option<number> {
+	pool += 1;
+	if (Math.random() > chance) return None;
+	const winnings = pool;
+	pool = 0;
+	return Some(winnings);
+}
+
+let balance = 0;
+for (let i = 0; i < games; i++) {
+	balance += match play() {
+		Some(winnings) => winnings,
+		None => -1,
+	};
+}
+console.log(`Net balance: $${balance}`);
+
+balance = 0;
+for (let i = 0; i < games; i++) {
+	balance += unwrapOr(play(), -1);
+}
+console.log(`Net balance: $${balance}`);

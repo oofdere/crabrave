@@ -1,0 +1,4 @@
+grammar/tree-sitter-crabrave.wasm binary linguist-generated
+grammar/src/grammar.json linguist-generated
+grammar/src/node-types.json linguist-generated
+*.crab linguist-language=TypeScript

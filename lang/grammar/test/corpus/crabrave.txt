@@ -1,0 +1,560 @@
+============================================================
+Unit, tuple and named-field variants
+============================================================
+
+enum Shape {
+  Circle(number),
+  Rect(w: number, h: number),
+  Empty,
+}
+
+---
+
+(program
+  (enum_declaration
+    (identifier)
+    (enum_body
+      (enum_variant
+        (identifier)
+        (variant_fields
+          (predefined_type)))
+      (enum_variant
+        (identifier)
+        (variant_fields
+          (named_field
+            (identifier)
+            (type_annotation
+              (predefined_type)))
+          (named_field
+            (identifier)
+            (type_annotation
+              (predefined_type)))))
+      (enum_variant
+        (identifier)))))
+
+============================================================
+Generic enum with trailing comma and export
+============================================================
+
+export enum Result<T, E = Error> { Ok(T), Err(E), }
+
+---
+
+(program
+  (export_statement
+    (enum_declaration
+      (identifier)
+      (type_parameters
+        (type_parameter
+          (type_identifier))
+        (type_parameter
+          (type_identifier)
+          (default_type
+            (type_identifier))))
+      (enum_body
+        (enum_variant
+          (identifier)
+          (variant_fields
+            (type_identifier)))
+        (enum_variant
+          (identifier)
+          (variant_fields
+            (type_identifier)))))))
+
+============================================================
+Match with every pattern kind
+============================================================
+
+const label = match shape {
+  Circle(r) if r > 10 => "big circle",
+  Circle(_) => "circle",
+  Rect(w, h) | Square(w, h) => `${w}x${h}`,
+  Empty => "empty",
+  _ => "unknown",
+};
+
+---
+
+(program
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (match_expression
+        (identifier)
+        (match_body
+          (match_arm
+            (variant_pattern
+              (identifier)
+              (variant_pattern_fields
+                (identifier)))
+            (match_guard
+              (binary_expression
+                (identifier)
+                (number)))
+            (string
+              (string_fragment)))
+          (match_arm
+            (variant_pattern
+              (identifier)
+              (variant_pattern_fields
+                (wildcard_pattern)))
+            (string
+              (string_fragment)))
+          (match_arm
+            (or_pattern
+              (variant_pattern
+                (identifier)
+                (variant_pattern_fields
+                  (identifier)
+                  (identifier)))
+              (variant_pattern
+                (identifier)
+                (variant_pattern_fields
+                  (identifier)
+                  (identifier))))
+            (template_string
+              (template_substitution
+                (identifier))
+              (string_fragment)
+              (template_substitution
+                (identifier))))
+          (match_arm
+            (variant_pattern
+              (identifier))
+            (string
+              (string_fragment)))
+          (match_arm
+            (wildcard_pattern)
+            (string
+              (string_fragment))))))))
+
+============================================================
+Match arms with block bodies, commas optional
+============================================================
+
+match msg {
+  Move({ x, y }) => { go(x, y); }
+  Write([first, ...rest]) => {
+    log(first);
+    rest.length
+  },
+  Quit => {}
+}
+
+---
+
+(program
+  (expression_statement
+    (match_expression
+      (identifier)
+      (match_body
+        (match_arm
+          (variant_pattern
+            (identifier)
+            (variant_pattern_fields
+              (object_pattern
+                (shorthand_property_identifier_pattern)
+                (shorthand_property_identifier_pattern))))
+          (statement_block
+            (expression_statement
+              (call_expression
+                (identifier)
+                (arguments
+                  (identifier)
+                  (identifier))))))
+        (match_arm
+          (variant_pattern
+            (identifier)
+            (variant_pattern_fields
+              (array_pattern
+                (identifier)
+                (rest_pattern
+                  (identifier)))))
+          (statement_block
+            (expression_statement
+              (call_expression
+                (identifier)
+                (arguments
+                  (identifier))))
+            (expression_statement
+              (member_expression
+                (identifier)
+                (property_identifier)))))
+        (match_arm
+          (variant_pattern
+            (identifier))
+          (statement_block))))))
+
+============================================================
+Literal patterns
+============================================================
+
+match status { 200 | 201 => "ok", -1 => "neg", "x" => 1, true => 2, null | undefined => 3, _ => 4 }
+
+---
+
+(program
+  (expression_statement
+    (match_expression
+      (identifier)
+      (match_body
+        (match_arm
+          (or_pattern
+            (literal_pattern
+              (number))
+            (literal_pattern
+              (number)))
+          (string
+            (string_fragment)))
+        (match_arm
+          (literal_pattern
+            (number))
+          (string
+            (string_fragment)))
+        (match_arm
+          (literal_pattern
+            (string
+              (string_fragment)))
+          (number))
+        (match_arm
+          (literal_pattern
+            (true))
+          (number))
+        (match_arm
+          (or_pattern
+            (literal_pattern
+              (null))
+            (literal_pattern
+              (undefined)))
+          (number))
+        (match_arm
+          (wildcard_pattern)
+          (number))))))
+
+============================================================
+Nested match and object body
+============================================================
+
+const f = (a: A) => match a { X => match b { Y => 1, _ => 2 }, _ => ({ z: 3 }) };
+
+---
+
+(program
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (arrow_function
+        (formal_parameters
+          (required_parameter
+            (identifier)
+            (type_annotation
+              (type_identifier))))
+        (match_expression
+          (identifier)
+          (match_body
+            (match_arm
+              (variant_pattern
+                (identifier))
+              (match_expression
+                (identifier)
+                (match_body
+                  (match_arm
+                    (variant_pattern
+                      (identifier))
+                    (number))
+                  (match_arm
+                    (wildcard_pattern)
+                    (number)))))
+            (match_arm
+              (wildcard_pattern)
+              (parenthesized_expression
+                (object
+                  (pair
+                    (property_identifier)
+                    (number)))))))))))
+
+============================================================
+Try operator
+============================================================
+
+async function f() {
+  const a = parse(input)?;
+  const b = await load(a)?;
+  use(a?, [b?], { b: b? });
+  return x + y? * 2;
+}
+
+---
+
+(program
+  (function_declaration
+    (identifier)
+    (formal_parameters)
+    (statement_block
+      (lexical_declaration
+        (variable_declarator
+          (identifier)
+          (try_expression
+            (call_expression
+              (identifier)
+              (arguments
+                (identifier))))))
+      (lexical_declaration
+        (variable_declarator
+          (identifier)
+          (try_expression
+            (await_expression
+              (call_expression
+                (identifier)
+                (arguments
+                  (identifier)))))))
+      (expression_statement
+        (call_expression
+          (identifier)
+          (arguments
+            (try_expression
+              (identifier))
+            (array
+              (try_expression
+                (identifier)))
+            (object
+              (pair
+                (property_identifier)
+                (try_expression
+                  (identifier)))))))
+      (return_statement
+        (binary_expression
+          (identifier)
+          (binary_expression
+            (try_expression
+              (identifier))
+            (number)))))))
+
+============================================================
+Try operator does not break ternaries or optional syntax
+============================================================
+
+const t = cond ? a : b;
+const u = cond ? a? : b;
+const v = a?.b ?? c;
+function g(x?: number, y?): void {}
+type T = { a?: string; m?(): void };
+const arrow = (z?: number) => z;
+
+---
+
+(program
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (ternary_expression
+        (identifier)
+        (identifier)
+        (identifier))))
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (ternary_expression
+        (identifier)
+        (try_expression
+          (identifier))
+        (identifier))))
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (binary_expression
+        (member_expression
+          (identifier)
+          (optional_chain)
+          (property_identifier))
+        (identifier))))
+  (function_declaration
+    (identifier)
+    (formal_parameters
+      (optional_parameter
+        (identifier)
+        (type_annotation
+          (predefined_type)))
+      (optional_parameter
+        (identifier)))
+    (type_annotation
+      (predefined_type))
+    (statement_block))
+  (type_alias_declaration
+    (type_identifier)
+    (object_type
+      (property_signature
+        (property_identifier)
+        (type_annotation
+          (predefined_type)))
+      (method_signature
+        (property_identifier)
+        (formal_parameters)
+        (type_annotation
+          (predefined_type)))))
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (arrow_function
+        (formal_parameters
+          (optional_parameter
+            (identifier)
+            (type_annotation
+              (predefined_type))))
+        (identifier)))))
+
+============================================================
+match and _ remain usable as identifiers
+============================================================
+
+const match = re.exec(s);
+if (match) match.length;
+match(1, 2);
+match = null;
+const { match: m, _ } = obj;
+_.map((_) => _);
+
+---
+
+(program
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (call_expression
+        (member_expression
+          (identifier)
+          (property_identifier))
+        (arguments
+          (identifier)))))
+  (if_statement
+    (parenthesized_expression
+      (identifier))
+    (expression_statement
+      (member_expression
+        (identifier)
+        (property_identifier))))
+  (expression_statement
+    (call_expression
+      (identifier)
+      (arguments
+        (number)
+        (number))))
+  (expression_statement
+    (assignment_expression
+      (identifier)
+      (null)))
+  (lexical_declaration
+    (variable_declarator
+      (object_pattern
+        (pair_pattern
+          (property_identifier)
+          (identifier))
+        (shorthand_property_identifier_pattern))
+      (identifier)))
+  (expression_statement
+    (call_expression
+      (member_expression
+        (identifier)
+        (property_identifier))
+      (arguments
+        (arrow_function
+          (formal_parameters
+            (required_parameter
+              (identifier)))
+          (identifier))))))
+
+============================================================
+Try operator binds tighter than binary operators
+============================================================
+
+a && b?;
+!c?;
+x? ?? y;
+x? === y? || z? !== w;
+a? + b? - 1;
+c ? +1 : -2;
+
+---
+
+(program
+  (expression_statement
+    (binary_expression
+      (identifier)
+      (try_expression
+        (identifier))))
+  (expression_statement
+    (try_expression
+      (unary_expression
+        (identifier))))
+  (expression_statement
+    (binary_expression
+      (try_expression
+        (identifier))
+      (identifier)))
+  (expression_statement
+    (binary_expression
+      (binary_expression
+        (try_expression
+          (identifier))
+        (try_expression
+          (identifier)))
+      (binary_expression
+        (try_expression
+          (identifier))
+        (identifier))))
+  (expression_statement
+    (binary_expression
+      (binary_expression
+        (try_expression
+          (identifier))
+        (try_expression
+          (identifier)))
+      (number)))
+  (expression_statement
+    (ternary_expression
+      (identifier)
+      (unary_expression
+        (number))
+      (unary_expression
+        (number)))))
+
+============================================================
+Try operator at the end of a line without a semicolon
+============================================================
+
+function f() {
+  const a = load()?
+  const b = cond
+    ? a
+    : load()?
+  return a + b
+}
+
+---
+
+(program
+  (function_declaration
+    (identifier)
+    (formal_parameters)
+    (statement_block
+      (lexical_declaration
+        (variable_declarator
+          (identifier)
+          (try_expression
+            (call_expression
+              (identifier)
+              (arguments)))))
+      (lexical_declaration
+        (variable_declarator
+          (identifier)
+          (ternary_expression
+            (identifier)
+            (identifier)
+            (try_expression
+              (call_expression
+                (identifier)
+                (arguments))))))
+      (return_statement
+        (binary_expression
+          (identifier)
+          (identifier))))))

@@ -1,0 +1,45 @@
+{
+  "grammars": [
+    {
+      "name": "crabrave",
+      "camelcase": "Crabrave",
+      "scope": "source.crab",
+      "path": ".",
+      "file-types": [
+        "crab"
+      ],
+      "highlights": [
+        "../node_modules/tree-sitter-javascript/queries/highlights.scm",
+        "../node_modules/tree-sitter-typescript/queries/highlights.scm",
+        "queries/highlights.scm"
+      ],
+      "injection-regex": "^crab(rave)?$",
+      "locals": [
+        "../node_modules/tree-sitter-javascript/queries/locals.scm",
+        "../node_modules/tree-sitter-typescript/queries/locals.scm"
+      ]
+    }
+  ],
+  "metadata": {
+    "version": "0.0.0",
+    "license": "MIT",
+    "description": "TypeScript with Rust-style enums, match and ?",
+    "authors": [
+      {
+        "name": "Tibet Tornaci",
+        "email": "oofdere@hey.com"
+      }
+    ],
+    "links": {
+      "repository": "https://github.com/oofdere/crabrave"
+    }
+  },
+  "bindings": {
+    "c": false,
+    "go": false,
+    "node": false,
+    "python": false,
+    "rust": false,
+    "swift": false
+  }
+}

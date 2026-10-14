@@ -1,0 +1,133 @@
+import { Err, None, Ok, type Option, type Result, Some } from "@oofdere/crabrave-lang/prelude";
+
+export enum Shape {
+	Circle(radius: number),
+	Rect(w: number, h: number),
+	Empty,
+}
+
+export enum Tree<T> {
+	Leaf(T),
+	Node(Tree<T>, Tree<T>),
+}
+
+// `return match`: an if-chain that returns from each arm.
+export function area(shape: Shape): number {
+	return match shape {
+		Circle(r) => Math.PI * r * r,
+		Rect(w, h) => w * h,
+		Empty => 0,
+	};
+}
+
+// Arrow body, guards, wildcards, or-patterns.
+export const describe = (shape: Shape) => match shape {
+	Circle(r) if r > 10 => "big circle",
+	Circle(_) => "circle",
+	Rect(w, h) if w === h => "square",
+	Rect(_, _) | Empty => "something else",
+};
+
+// Value position: the subject is hoisted, arms with bindings become arrows.
+export function both(a: Shape, b: Shape): string {
+	const pair = `${match a { Circle(r) => `circle ${r}`, _ => "not a circle" }} & ${match b { Rect(w, h) => `${w}x${h}`, _ => "not a rect" }}`;
+	return pair;
+}
+
+// Statement position, with block arms and `break`/`continue` of an outer loop.
+export function tally(shapes: Shape[]): Record<string, number> {
+	const counts = { circles: 0, rects: 0, empties: 0 };
+	for (const shape of shapes) {
+		match shape {
+			Circle(_) => { counts.circles++; }
+			Rect(w, _) => {
+				if (w < 0) continue;
+				counts.rects++;
+			}
+			Empty => {
+				counts.empties++;
+				if (counts.empties > 1) break;
+			}
+		}
+	}
+	return counts;
+}
+
+// Block arms evaluate to their last expression when it has no `;`.
+export function sizeClass(shape: Shape): string {
+	const size = match shape {
+		Circle(r) => {
+			const d = r * 2;
+			d > 10 ? "large" : "small"
+		}
+		_ => "n/a",
+	};
+	return size;
+}
+
+// Literal patterns.
+export const status = (code: number) => match code {
+	200 | 201 => "ok",
+	404 => "missing",
+	_ => "error",
+};
+
+// Recursive generic enum.
+export function sum(tree: Tree<number>): number {
+	return match tree {
+		Leaf(n) => n,
+		Node(left, right) => sum(left) + sum(right),
+	};
+}
+
+export const tree = Tree.Node(Tree.Leaf(1), Tree.Node(Tree.Leaf(2), Tree.Leaf(3)));
+
+// `?` returns early with the Err or None.
+export function parse(text: string): Result<number, string> {
+	const n = Number(text);
+	return Number.isNaN(n) ? Err(`not a number: ${text}`) : Ok(n);
+}
+
+export function add(a: string, b: string): Result<number, string> {
+	return Ok(parse(a)? + parse(b)?);
+}
+
+export function first<T>(items: T[]): Option<T> {
+	return items.length ? Some(items[0]) : None;
+}
+
+export function firstTwice(items: number[][]): Option<number> {
+	const inner = first(items)?;
+	return Some(first(inner)? * 2);
+}
+
+export async function fetchTwice(load: () => Promise<Result<number, string>>): Promise<Result<number, string>> {
+	const a = await load()?;
+	const b = await load()?;
+	return Ok(a + b);
+}
+
+// A subject that cannot be hoisted is wrapped in an arrow function instead.
+export function lazy(flag: boolean, make: () => Shape): string {
+	return flag ? match make() { Circle(_) => "made a circle", _ => "made something" } : "skipped";
+}
+
+// Where a runtime error lands, to check that line numbers survive.
+export function boom(shape: Shape): never {
+	match shape {
+		_ => {
+			throw new Error("boom");
+		}
+	}
+}
+
+// A line where hoisting moves code around: the stack should still point here.
+export function explode(text: string): Result<number, string> {
+	const value = mustBePositive(parse(text)?);
+	return Ok(value);
+}
+
+function mustBePositive(n: number): number {
+	if (n <= 0) throw new RangeError(`${n} is not positive`);
+	return n;
+}

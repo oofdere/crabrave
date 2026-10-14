@@ -1,0 +1,18 @@
+{
+	"compilerOptions": {
+		"strict": true,
+		"noEmit": true,
+		"target": "esnext",
+		"module": "preserve",
+		"moduleResolution": "bundler",
+		"allowImportingTsExtensions": true,
+		"erasableSyntaxOnly": true,
+		"verbatimModuleSyntax": true,
+		"skipLibCheck": true,
+		"types": ["node", "bun"]
+	},
+	"contentMappers": [
+		{ "package": "@oofdere/crabrave-lang", "extensions": [".crab"] }
+	],
+	"include": ["src", "test/*.ts", "test/fixtures/runtime", "vitest.config.ts"]
+}
