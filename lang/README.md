@@ -240,15 +240,25 @@ Imports of `.crab` modules need the extension: `import { Shape } from "./shapes.
 
 ### Editors
 
-The TypeScript 7.1 language server (`tsc --lsp --stdio`) gives `.crab` files
-hovers, go-to-definition and (pull) diagnostics once the client passes
-`initializationOptions: { runExternalCode: true }`. [`test/lsp.test.ts`](test/lsp.test.ts)
-drives it this way.
+[`editors/`](editors) has extensions for VS Code, Neovim, Helix and Zed. They
+all run the project's own TypeScript 7.1 language server (`tsc --lsp
+--stdio`) with `initializationOptions: { runExternalCode: true }`, which gives
+`.crab` files diagnostics, hover, completion, signature help, go to
+definition, references, rename and semantic tokens. Each one is tested in the
+real editor (see [`editors/README.md`](editors/README.md)).
 
-For highlighting, the grammar's queries are in
-[`grammar/queries/highlights.scm`](grammar/queries/highlights.scm) and only
-cover the new syntax, on top of the TypeScript and JavaScript queries (see
-[`grammar/tree-sitter.json`](grammar/tree-sitter.json)).
+| Editor | Install |
+|---|---|
+| VS Code | build `editors/vscode` with `bun run package` and install `crabrave.vsix` |
+| Neovim 0.11+ | add `editors/nvim` to `'runtimepath'`, run `:CrabraveBuildParser` |
+| Helix | merge `editors/helix/languages.toml` and copy its queries, then `hx --grammar build` |
+| Zed | **zed: install dev extension** on `editors/zed` |
+
+Highlighting comes from the tree-sitter grammar (VS Code uses a TextMate
+injection on top of its TypeScript grammar instead). The grammar's own queries
+in [`grammar/queries/highlights.scm`](grammar/queries/highlights.scm) only
+cover the new syntax, on top of the TypeScript and JavaScript queries listed
+in [`grammar/tree-sitter.json`](grammar/tree-sitter.json).
 
 ### Running
 
@@ -329,6 +339,7 @@ bun run test            # compiler, runtime, tsc and language server tests
 
 ```
 grammar/        tree-sitter grammar (extends tree-sitter-typescript), queries, corpus
+editors/        VS Code, Neovim, Helix and Zed support
 src/            compiler, content mapper, Vite and Bun plugins, prelude
 examples/       the crabrave 1.x examples, ported
 test/           Vitest suites and fixtures
