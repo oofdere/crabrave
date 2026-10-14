@@ -1,0 +1,96 @@
+{
+	"name": "crabrave",
+	"displayName": "crabrave",
+	"description": "TypeScript with Rust-style enums, match and ?: language server and syntax for .crab files",
+	"version": "0.0.1",
+	"publisher": "oofdere",
+	"private": true,
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/oofdere/crabrave",
+		"directory": "lang/editors/vscode"
+	},
+	"engines": {
+		"vscode": "^1.91.0"
+	},
+	"categories": ["Programming Languages"],
+	"main": "./dist/extension.js",
+	"activationEvents": ["workspaceContains:**/*.crab"],
+	"capabilities": {
+		"untrustedWorkspaces": {
+			"supported": false,
+			"description": "The crabrave language server runs the content mapper from the project's node_modules."
+		}
+	},
+	"contributes": {
+		"languages": [
+			{
+				"id": "crabrave",
+				"aliases": ["crabrave", "crab"],
+				"extensions": [".crab"],
+				"configuration": "./language-configuration.json"
+			}
+		],
+		"grammars": [
+			{
+				"language": "crabrave",
+				"scopeName": "source.crab",
+				"path": "./syntaxes/crabrave.tmLanguage.json"
+			},
+			{
+				"scopeName": "crabrave.injection",
+				"path": "./syntaxes/crabrave.injection.tmLanguage.json",
+				"injectTo": ["source.crab"]
+			}
+		],
+		"commands": [
+			{
+				"command": "crabrave.restartServer",
+				"title": "Restart Language Server",
+				"category": "crabrave"
+			},
+			{
+				"command": "crabrave.showOutput",
+				"title": "Show Language Server Output",
+				"category": "crabrave"
+			}
+		],
+		"configuration": {
+			"title": "crabrave",
+			"properties": {
+				"crabrave.typescript.path": {
+					"type": "string",
+					"default": "",
+					"markdownDescription": "Path to a TypeScript 7.1+ package (the folder containing its `package.json`). By default the extension looks for `node_modules/typescript` next to each `.crab` file and in its parent folders."
+				},
+				"crabrave.typescriptFiles": {
+					"type": "boolean",
+					"default": false,
+					"markdownDescription": "Also use the crabrave language server for `.ts`/`.tsx`/`.js` files in projects that contain `.crab` files, so they can import `.crab` modules. Turn off VS Code's built-in TypeScript features for those files to avoid duplicate results."
+				},
+				"crabrave.trace.server": {
+					"type": "string",
+					"enum": ["off", "messages", "verbose"],
+					"default": "off",
+					"description": "Log the messages between VS Code and the language server."
+				}
+			}
+		}
+	},
+	"scripts": {
+		"build": "bun build src/extension.ts --outdir dist --target node --format cjs --external vscode --sourcemap=linked",
+		"build:test": "bun build test/suite/index.ts --outdir dist/test --target node --format cjs --external vscode",
+		"typecheck": "tsc -p .",
+		"test": "bun run build && bun run build:test && node test/run.mjs",
+		"package": "bun run build && vsce package --no-dependencies --skip-license -o crabrave.vsix"
+	},
+	"devDependencies": {
+		"@types/node": "22.20.5",
+		"@types/vscode": "1.91.0",
+		"@vscode/test-electron": "3.1.0",
+		"@vscode/vsce": "4.0.0",
+		"typescript": "7.1.0-dev.20261014.1",
+		"vscode-languageclient": "10.1.2"
+	}
+}

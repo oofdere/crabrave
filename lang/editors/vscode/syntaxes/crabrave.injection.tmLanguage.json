@@ -1,0 +1,80 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"scopeName": "crabrave.injection",
+	"comment": "Injected into source.crab ahead of the TypeScript grammar's own rules.",
+	"injectionSelector": "L:source.crab -comment -string",
+	"patterns": [
+		{ "include": "#try" },
+		{ "include": "#match" },
+		{ "include": "#variant-pattern" },
+		{ "include": "#wildcard" },
+		{ "include": "#enum" }
+	],
+	"repository": {
+		"try": {
+			"comment": "`expr?`: a `?` that cannot start a ternary branch. Claiming it here stops TypeScript's ternary rule from waiting for a `:`.",
+			"match": "\\?(?![?.])(?=\\s*(?:$|[;,)\\]}*%>|&^=]|!=|[+-]\\s))",
+			"name": "keyword.operator.try.crab"
+		},
+		"match": {
+			"match": "\\bmatch\\b(?=\\s+(?![\\s=;,.)\\]}:?&|+\\-*/%<>!^]|in\\b|of\\b|as\\b|instanceof\\b|satisfies\\b))",
+			"name": "keyword.control.match.crab"
+		},
+		"variant-pattern": {
+			"comment": "`Circle(r) =>`, `Rect(w, h) |`, `Empty =>` in match arms.",
+			"match": "\\b([A-Z][\\w$]*)(?=\\s*(?:\\([^()]*\\))?\\s*(?:=>|\\||\\bif\\b))",
+			"captures": {
+				"1": { "name": "variable.other.enummember.crab" }
+			}
+		},
+		"wildcard": {
+			"match": "\\b_\\b(?=\\s*(?:=>|[,)|]|\\bif\\b))",
+			"name": "variable.language.wildcard.crab"
+		},
+		"enum": {
+			"comment": "`enum Name<T> { Variant(field: Type, Type), Unit }`, replacing TypeScript's enum rule.",
+			"begin": "(?<![\\w$.])(?:(export)\\s+)?(enum)\\s+([A-Za-z_$][\\w$]*)\\s*(<[^{]*>)?\\s*(\\{)",
+			"beginCaptures": {
+				"1": { "name": "storage.modifier.ts" },
+				"2": { "name": "storage.type.enum.ts" },
+				"3": { "name": "entity.name.type.enum.ts" },
+				"4": { "patterns": [{ "include": "source.ts#type-parameters" }] },
+				"5": { "name": "punctuation.definition.block.ts" }
+			},
+			"end": "\\}",
+			"endCaptures": {
+				"0": { "name": "punctuation.definition.block.ts" }
+			},
+			"name": "meta.enum.declaration.crab",
+			"patterns": [
+				{ "include": "source.ts#comment" },
+				{
+					"begin": "([A-Za-z_$][\\w$]*)\\s*(\\()",
+					"beginCaptures": {
+						"1": { "name": "variable.other.enummember.ts" },
+						"2": { "name": "meta.brace.round.ts" }
+					},
+					"end": "\\)",
+					"endCaptures": {
+						"0": { "name": "meta.brace.round.ts" }
+					},
+					"patterns": [
+						{ "include": "source.ts#comment" },
+						{
+							"match": "(\\.\\.\\.)?([A-Za-z_$][\\w$]*)\\s*(:)",
+							"captures": {
+								"1": { "name": "keyword.operator.rest.ts" },
+								"2": { "name": "variable.parameter.ts" },
+								"3": { "name": "keyword.operator.type.annotation.ts" }
+							}
+						},
+						{ "match": ",", "name": "punctuation.separator.comma.ts" },
+						{ "include": "source.ts#type" }
+					]
+				},
+				{ "match": "[A-Za-z_$][\\w$]*", "name": "variable.other.enummember.ts" },
+				{ "match": ",", "name": "punctuation.separator.comma.ts" }
+			]
+		}
+	}
+}
