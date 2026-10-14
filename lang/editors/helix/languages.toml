@@ -1,0 +1,28 @@
+# Add to ~/.config/helix/languages.toml (or .helix/languages.toml in a
+# project), copy runtime/queries/crabrave to ~/.config/helix/runtime/queries/,
+# then run `hx --grammar fetch && hx --grammar build`.
+
+[[language]]
+name = "crabrave"
+scope = "source.crab"
+injection-regex = "crab(rave)?"
+file-types = ["crab"]
+roots = ["tsconfig.json", "package.json"]
+comment-token = "//"
+block-comment-tokens = { start = "/*", end = "*/" }
+indent = { tab-width = 2, unit = "  " }
+language-servers = ["crabrave"]
+grammar = "crabrave"
+
+# The project's TypeScript 7.1 language server. It understands .crab files
+# through the crabrave content mapper in the project's tsconfig.json, which
+# only runs when `runExternalCode` is set. In a monorepo, point Helix's
+# `workspace-lsp-roots` at the package that has TypeScript 7.1 installed.
+[language-server.crabrave]
+command = "npx"
+args = ["--no", "--", "tsc", "--lsp", "--stdio"]
+config = { runExternalCode = true }
+
+[[grammar]]
+name = "crabrave"
+source = { git = "https://github.com/oofdere/crabrave", rev = "fd549a524d93c9917a7354af5d2d034cdc4693ef", subpath = "lang/grammar" }

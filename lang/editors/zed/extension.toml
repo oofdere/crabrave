@@ -1,0 +1,17 @@
+id = "crabrave"
+name = "crabrave"
+version = "0.0.1"
+schema_version = 1
+authors = ["Tibet Tornaci <oofdere@hey.com>"]
+description = "TypeScript with Rust-style enums, match and ?: language server and syntax for .crab files"
+repository = "https://github.com/oofdere/crabrave"
+
+# A commit of this repository with the generated parser in lang/grammar/src.
+[grammars.crabrave]
+repository = "https://github.com/oofdere/crabrave"
+rev = "fd549a524d93c9917a7354af5d2d034cdc4693ef"
+path = "lang/grammar"
+
+[language_servers.crabrave]
+name = "crabrave (TypeScript 7.1)"
+languages = ["crabrave"]
